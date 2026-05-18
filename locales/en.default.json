@@ -28,7 +28,10 @@
     "each": "each",
     "adding": "Adding...",
     "added": "Added!",
-    "error": "Error — try again"
+    "error": "Error — try again",
+    "view_cart": "View cart",
+    "free_shipping_away": "Add {{ amount }} more for free shipping",
+    "free_shipping_unlocked": "You've unlocked free shipping!"
   },
   "customers": {
     "login": {
@@ -68,7 +71,25 @@
     },
     "quick_add": "Quick add",
     "sold_out": "Sold out",
-    "price_from": "From"
+    "price_from": "From",
+    "compare": {
+      "add": "Compare",
+      "added": "Added",
+      "add_label": "Add {{ title }} to comparison",
+      "title": "Compare products",
+      "compare_now": "Compare now",
+      "clear": "Clear all",
+      "product_selected": "product selected",
+      "products_selected": "products selected",
+      "remove": "Remove",
+      "availability": "Availability",
+      "brand": "Brand",
+      "product_type": "Type",
+      "description": "Description",
+      "in_stock": "In stock",
+      "max_reached": "Maximum 4 products",
+      "bar_label": "Product comparison"
+    }
   },
   "sections": {
     "header": {
@@ -104,6 +125,7 @@
       "sample_returns": "Returns",
       "sample_about": "About us",
       "sample_contact": "Contact",
+      "store_locator": "Store locator",
       "sample_blog": "Blog",
       "sample_reviews": "Customer reviews"
     },
@@ -165,6 +187,25 @@
       "show_read_time": "Show read time",
       "articles_per_page": "Articles per page",
       "heading_info": "Defaults to the blog title if left blank"
+    },
+    "store_locator": {
+      "search_placeholder": "Search by name, city, or zip",
+      "filter_by_city": "Filter by city",
+      "all_stores": "All stores",
+      "near_me": "Near me",
+      "near_me_active": "Near me ✓",
+      "locating": "Locating…",
+      "store_singular": "store found",
+      "store_plural": "stores found",
+      "no_results": "No stores match your search.",
+      "get_directions": "Get directions",
+      "in_stock": "In stock",
+      "limited": "Limited stock",
+      "out_of_stock": "Out of stock"
+    },
+    "recently_viewed": {
+      "empty": "Browse our store and the products you view will appear here.",
+      "browse": "Browse all products"
     },
     "reviews": {
       "based_on": "Based on {{ count }} reviews",

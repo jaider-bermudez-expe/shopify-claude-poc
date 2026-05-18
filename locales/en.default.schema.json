@@ -2,6 +2,29 @@
   "sections": {
     "blog_landing": {
       "name": "Blog"
+    },
+    "store_locator": {
+      "name": "Store locator",
+      "block_name": "Store",
+      "address": "Street address",
+      "city": "City",
+      "state": "State / Province",
+      "zip": "ZIP / Postal code",
+      "phone": "Phone number",
+      "hours": "Store hours",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "coords_info": "Find coordinates at maps.google.com — right-click any location",
+      "inventory_status": "Inventory status",
+      "inventory_text": "Inventory description",
+      "in_stock": "In stock",
+      "limited": "Limited stock",
+      "out_of_stock": "Out of stock"
+    },
+    "recently_viewed": {
+      "name": "Recently viewed",
+      "max_products": "Number of products to show",
+      "show_empty_state": "Show message when no products have been viewed"
     }
   },
   "general": {

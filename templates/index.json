@@ -1,14 +1,5 @@
 {
   "sections": {
-    "promo-bar": {
-      "type": "promo-banner",
-      "settings": {
-        "text": "Free shipping on orders over $75",
-        "link_text": "Shop now",
-        "background_color": "#1a1a1a",
-        "text_color": "#ffffff"
-      }
-    },
     "hero": {
       "type": "hero-banner",
       "settings": {
@@ -52,7 +43,6 @@
     }
   },
   "order": [
-    "promo-bar",
     "hero",
     "featured-collections",
     "product-shelf",

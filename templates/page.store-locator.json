@@ -1,0 +1,101 @@
+{
+  "sections": {
+    "main": {
+      "type": "store-locator",
+      "blocks": {
+        "store-manhattan": {
+          "type": "store",
+          "settings": {
+            "name": "DevExpe Manhattan",
+            "address": "451 Broadway",
+            "city": "New York",
+            "state": "NY",
+            "zip": "10013",
+            "phone": "(212) 555-0101",
+            "hours": "Mon–Sat 10am–8pm, Sun 11am–6pm",
+            "lat": "40.7214",
+            "lng": "-74.0052",
+            "inventory_status": "in_stock",
+            "inventory_text": "Full selection available, including new arrivals"
+          }
+        },
+        "store-soho": {
+          "type": "store",
+          "settings": {
+            "name": "DevExpe SoHo",
+            "address": "112 Prince St",
+            "city": "New York",
+            "state": "NY",
+            "zip": "10012",
+            "phone": "(212) 555-0102",
+            "hours": "Mon–Sat 10am–9pm, Sun 11am–7pm",
+            "lat": "40.7256",
+            "lng": "-73.9981",
+            "inventory_status": "limited",
+            "inventory_text": "Select items in stock — call ahead to confirm"
+          }
+        },
+        "store-beverly-hills": {
+          "type": "store",
+          "settings": {
+            "name": "DevExpe Beverly Hills",
+            "address": "346 N Rodeo Dr",
+            "city": "Beverly Hills",
+            "state": "CA",
+            "zip": "90210",
+            "phone": "(310) 555-0103",
+            "hours": "Mon–Sat 10am–8pm, Sun 12pm–6pm",
+            "lat": "34.0695",
+            "lng": "-118.3994",
+            "inventory_status": "in_stock",
+            "inventory_text": "Full selection plus exclusive LA editions"
+          }
+        },
+        "store-san-francisco": {
+          "type": "store",
+          "settings": {
+            "name": "DevExpe San Francisco",
+            "address": "2100 Chestnut St",
+            "city": "San Francisco",
+            "state": "CA",
+            "zip": "94123",
+            "phone": "(415) 555-0104",
+            "hours": "Mon–Fri 11am–7pm, Sat–Sun 10am–6pm",
+            "lat": "37.8005",
+            "lng": "-122.4382",
+            "inventory_status": "in_stock",
+            "inventory_text": "Most items available, restocked weekly"
+          }
+        },
+        "store-chicago": {
+          "type": "store",
+          "settings": {
+            "name": "DevExpe Chicago",
+            "address": "1555 N Milwaukee Ave",
+            "city": "Chicago",
+            "state": "IL",
+            "zip": "60622",
+            "phone": "(773) 555-0105",
+            "hours": "Mon–Sat 10am–8pm, Sun 11am–6pm",
+            "lat": "41.9093",
+            "lng": "-87.6710",
+            "inventory_status": "limited",
+            "inventory_text": "Limited seasonal collection currently in stock"
+          }
+        }
+      },
+      "block_order": [
+        "store-manhattan",
+        "store-soho",
+        "store-beverly-hills",
+        "store-san-francisco",
+        "store-chicago"
+      ],
+      "settings": {
+        "heading": "Find a store",
+        "subheading": "Visit us in person — find your nearest location below"
+      }
+    }
+  },
+  "order": ["main"]
+}

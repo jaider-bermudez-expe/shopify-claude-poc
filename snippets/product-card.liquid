@@ -108,6 +108,24 @@
         </button>
       {%- endif -%}
     {%- endif -%}
+
+    <button
+      type="button"
+      class="product-card__compare-btn"
+      data-compare-toggle
+      data-product-handle="{{ product.handle }}"
+      aria-pressed="false"
+      aria-label="{{ 'products.compare.add_label' | t: title: product.title | escape }}"
+    >
+      <svg class="compare-icon-add" width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="1" y="4.5" width="6" height="7.5" rx="1"/>
+        <rect x="6" y="1" width="6" height="7.5" rx="1"/>
+      </svg>
+      <svg class="compare-icon-check" width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="1.5 6.5 5 10 11.5 3"/>
+      </svg>
+      <span data-compare-text>{{ 'products.compare.add' | t }}</span>
+    </button>
   </div>
 </article>
 

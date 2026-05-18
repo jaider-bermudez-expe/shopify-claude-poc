@@ -1,0 +1,32 @@
+{% doc %}
+  Records the current product handle into localStorage so the recently-viewed
+  section can display it on subsequent pages.
+
+  @param {product} product - The product being viewed
+
+  @example
+  {% render 'recently-viewed-tracker', product: product %}
+{% enddoc %}
+
+<recently-viewed-tracker
+  data-handle="{{ product.handle | escape }}"
+  style="display:none"
+  aria-hidden="true"
+></recently-viewed-tracker>
+
+{% javascript %}
+  (function () {
+    var MAX = 12;
+    var KEY = 'rv_handles';
+    document.querySelectorAll('recently-viewed-tracker').forEach(function (el) {
+      var handle = el.dataset.handle;
+      if (!handle) return;
+      try {
+        var list = JSON.parse(localStorage.getItem(KEY) || '[]');
+        list = list.filter(function (h) { return h !== handle; });
+        list.unshift(handle);
+        localStorage.setItem(KEY, JSON.stringify(list.slice(0, MAX)));
+      } catch (e) {}
+    });
+  })();
+{% endjavascript %}

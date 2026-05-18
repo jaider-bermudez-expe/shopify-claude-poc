@@ -120,6 +120,7 @@
         .then(function (cart) {
           setButtonState(btn, 'added', originalText);
           updateCartBadges(cart.item_count);
+          document.dispatchEvent(new CustomEvent('cart:item-added', { detail: { cart: cart } }));
         })
         .catch(function () {
           setButtonState(btn, 'error', originalText);

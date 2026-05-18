@@ -1,3 +1,11 @@
+{% style %}
+  #shopify-section-group-header-group-{{ section.id }} {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+{% endstyle %}
+
 {%- if section.settings.announcement_text != blank -%}
   <div
     class="announcement full-width"
@@ -113,16 +121,19 @@
         </shopify-account>
       {%- endif -%}
 
-      <a
-        href="{{ routes.cart_url }}"
+      <button
+        type="button"
+        id="cart-drawer-toggle"
         class="header__icon-btn header__cart"
         aria-label="{{ 'sections.header.cart' | t }}"
+        aria-expanded="false"
+        aria-controls="cart-drawer"
       >
         {{ 'icon-cart.svg' | inline_asset_content }}
         {%- if cart.item_count > 0 -%}
           <span class="header__cart-count" aria-hidden="true">{{ cart.item_count }}</span>
         {%- endif -%}
-      </a>
+      </button>
     </div>
   </div>
 
@@ -231,9 +242,6 @@
 
   /* Header */
   .header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
     background-color: var(--color-background);
     border-bottom: 1px solid rgba(0, 0, 0, 0.07);
     transition: box-shadow var(--transition-base);

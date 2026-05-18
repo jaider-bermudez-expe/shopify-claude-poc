@@ -1,0 +1,943 @@
+{% doc %}
+  Global compare bar and modal. Rendered once in layout/theme.liquid.
+  Works with any product-card that has [data-compare-toggle] buttons.
+{% enddoc %}
+
+<div
+  id="compare-bar"
+  class="compare-bar"
+  hidden
+  data-money-format="{{ shop.money_format | escape }}"
+  data-i18n-add="{{ 'products.compare.add' | t | escape }}"
+  data-i18n-added="{{ 'products.compare.added' | t | escape }}"
+  data-i18n-compare-now="{{ 'products.compare.compare_now' | t | escape }}"
+  data-i18n-clear="{{ 'products.compare.clear' | t | escape }}"
+  data-i18n-product="{{ 'products.compare.product_selected' | t | escape }}"
+  data-i18n-products="{{ 'products.compare.products_selected' | t | escape }}"
+  data-i18n-remove="{{ 'products.compare.remove' | t | escape }}"
+  data-i18n-availability="{{ 'products.compare.availability' | t | escape }}"
+  data-i18n-brand="{{ 'products.compare.brand' | t | escape }}"
+  data-i18n-product-type="{{ 'products.compare.product_type' | t | escape }}"
+  data-i18n-description="{{ 'products.compare.description' | t | escape }}"
+  data-i18n-in-stock="{{ 'products.compare.in_stock' | t | escape }}"
+  data-i18n-sold-out="{{ 'products.sold_out' | t | escape }}"
+  data-i18n-add-to-cart="{{ 'sections.product.add_to_cart' | t | escape }}"
+  data-i18n-added-to-cart="{{ 'cart.added' | t | escape }}"
+  data-i18n-max="{{ 'products.compare.max_reached' | t | escape }}"
+  data-i18n-compare-title="{{ 'products.compare.title' | t | escape }}"
+  data-i18n-close="{{ 'sections.header.menu_close' | t | escape }}"
+  role="region"
+  aria-label="{{ 'products.compare.bar_label' | t }}"
+>
+  <div class="compare-bar__inner">
+    <div class="compare-bar__products" id="compare-bar-products" aria-live="polite"></div>
+    <div class="compare-bar__actions">
+      <span class="compare-bar__count" id="compare-bar-count"></span>
+      <button type="button" class="compare-bar__clear" id="compare-bar-clear">
+        {{ 'products.compare.clear' | t }}
+      </button>
+      <button type="button" class="compare-bar__btn" id="compare-bar-open" disabled>
+        {{ 'products.compare.compare_now' | t }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<div
+  id="compare-modal"
+  class="compare-modal"
+  hidden
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="compare-modal-heading"
+  tabindex="-1"
+>
+  <div class="compare-modal__backdrop" id="compare-modal-backdrop"></div>
+  <div class="compare-modal__panel">
+    <div class="compare-modal__top">
+      <h2 class="compare-modal__heading" id="compare-modal-heading">{{ 'products.compare.title' | t }}</h2>
+      <button type="button" class="compare-modal__close" id="compare-modal-close" aria-label="{{ 'sections.header.menu_close' | t }}">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <line x1="2" y1="2" x2="16" y2="16"/>
+          <line x1="16" y1="2" x2="2" y2="16"/>
+        </svg>
+      </button>
+    </div>
+    <div class="compare-modal__body" id="compare-modal-body"></div>
+  </div>
+</div>
+
+{% stylesheet %}
+  /* ── Bar ─────────────────────────────────────── */
+  .compare-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #1a1a1a;
+    color: #fff;
+    z-index: 200;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.2);
+  }
+
+  .compare-bar[hidden] { display: none; }
+
+  .compare-bar__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .compare-bar__products {
+    display: flex;
+    gap: 0.5rem;
+    flex: 1;
+    align-items: center;
+    flex-wrap: wrap;
+    min-height: 2.5rem;
+  }
+
+  .compare-bar__product {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 0.4rem;
+    padding: 0.3rem 0.4rem 0.3rem 0.3rem;
+    max-width: 160px;
+  }
+
+  .compare-bar__thumb {
+    width: 34px;
+    height: 34px;
+    object-fit: cover;
+    border-radius: 0.25rem;
+    flex-shrink: 0;
+    background: #333;
+  }
+
+  .compare-bar__product-name {
+    font-size: 0.72rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    max-width: 80px;
+  }
+
+  .compare-bar__remove {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.45);
+    cursor: pointer;
+    padding: 0.15rem;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    transition: color 0.15s;
+    line-height: 1;
+  }
+
+  .compare-bar__remove:hover { color: #fff; }
+
+  .compare-bar__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-shrink: 0;
+  }
+
+  .compare-bar__count {
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.55);
+    white-space: nowrap;
+  }
+
+  .compare-bar__clear {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    color: rgba(255, 255, 255, 0.65);
+    padding: 0.45rem 0.875rem;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+
+  .compare-bar__clear:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+    color: #fff;
+  }
+
+  .compare-bar__btn {
+    background: var(--color-accent, #8b7355);
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+  }
+
+  .compare-bar__btn:hover:not(:disabled) { opacity: 0.85; }
+  .compare-bar__btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  @keyframes compare-shake {
+    0%, 100% { transform: translateX(0); }
+    20%       { transform: translateX(-5px); }
+    40%       { transform: translateX(5px); }
+    60%       { transform: translateX(-4px); }
+    80%       { transform: translateX(4px); }
+  }
+
+  .compare-bar--shake { animation: compare-shake 0.45s ease; }
+
+  /* ── Modal ───────────────────────────────────── */
+  .compare-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    display: flex;
+    align-items: flex-end;
+  }
+
+  .compare-modal[hidden] { display: none; }
+
+  .compare-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  .compare-modal__panel {
+    position: relative;
+    background: #fff;
+    width: 100%;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: 1rem 1rem 0 0;
+    overflow: hidden;
+  }
+
+  @media (min-width: 768px) {
+    .compare-modal {
+      align-items: center;
+      justify-content: center;
+    }
+
+    .compare-modal__panel {
+      width: 94%;
+      max-width: 1140px;
+      max-height: 88vh;
+      border-radius: 1rem;
+    }
+  }
+
+  .compare-modal__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 1.5rem;
+    border-bottom: 1px solid #e8e5e0;
+    flex-shrink: 0;
+  }
+
+  .compare-modal__heading {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .compare-modal__close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #999;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    transition: color 0.15s;
+    line-height: 1;
+  }
+
+  .compare-modal__close:hover { color: #333; }
+
+  .compare-modal__body {
+    overflow-y: auto;
+    overflow-x: auto;
+    flex: 1;
+    padding: 0 1.5rem 2rem;
+  }
+
+  .compare-modal__loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+  }
+
+  .compare-modal__spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e8e5e0;
+    border-top-color: var(--color-accent, #8b7355);
+    border-radius: 50%;
+    animation: compare-spin 0.7s linear infinite;
+  }
+
+  @keyframes compare-spin { to { transform: rotate(360deg); } }
+
+  .compare-modal__error {
+    text-align: center;
+    color: #c00;
+    padding: 3rem 0;
+  }
+
+  body.compare-open { overflow: hidden; }
+
+  /* ── Comparison table ────────────────────────── */
+  .compare-table {
+    min-width: max(100%, calc(160px + var(--count, 2) * 210px));
+  }
+
+  /* Sticky header */
+  .ct__header {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 2;
+    display: flex;
+    border-bottom: 2px solid #e8e5e0;
+    padding-top: 1.5rem;
+    padding-bottom: 0;
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .ct__hlabel { flex: 0 0 160px; }
+
+  .ct__hcells {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(var(--count, 2), 1fr);
+    gap: 0.75rem;
+  }
+
+  .ct__hcell {
+    padding: 0 0.5rem 1rem;
+    text-align: center;
+    position: relative;
+  }
+
+  .ct__img-wrap {
+    width: 100%;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    margin-bottom: 0.6rem;
+    background: #f5f5f0;
+  }
+
+  .ct__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+
+  .ct__product-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+
+  .ct__product-link:hover .ct__img { transform: scale(1.04); }
+  .ct__product-link:hover .ct__product-title { text-decoration: underline; }
+
+  .ct__product-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 0.35rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .ct__product-price { font-size: 0.875rem; margin-bottom: 0; }
+
+  .ct__old {
+    color: #bbb;
+    font-size: 0.78rem;
+    text-decoration: line-through;
+    margin-right: 0.25rem;
+  }
+
+  .ct__sale { color: #c00; font-weight: 600; }
+
+  /* Data rows */
+  .ct__body { padding-top: 0.5rem; }
+
+  .ct__row {
+    display: flex;
+    border-bottom: 1px solid #f0ede8;
+    align-items: center;
+    min-height: 3rem;
+  }
+
+  .ct__row:last-child { border-bottom: none; }
+  .ct__row:nth-child(even) { background: #fafaf8; }
+
+  .ct__label {
+    flex: 0 0 160px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    padding: 0.75rem 1rem 0.75rem 0;
+  }
+
+  .ct__cells {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(var(--count, 2), 1fr);
+    gap: 0.75rem;
+  }
+
+  .ct__cell {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.875rem;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ct__badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 2rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .ct__badge--avail {
+    background: rgba(45, 122, 58, 0.12);
+    color: #2d7a3a;
+  }
+
+  .ct__badge--unavail {
+    background: rgba(200, 0, 0, 0.09);
+    color: #c00;
+  }
+
+  .ct__select {
+    width: 100%;
+    max-width: 140px;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 0.375rem;
+    font-size: 0.82rem;
+    background: #fff;
+    cursor: pointer;
+    appearance: auto;
+  }
+
+  .ct__desc {
+    font-size: 0.78rem;
+    color: #666;
+    line-height: 1.5;
+    margin: 0;
+    text-align: left;
+  }
+
+  .ct__row--atc .ct__cell {
+    padding-top: 1.25rem;
+    padding-bottom: 1.25rem;
+    align-items: flex-end;
+  }
+
+  .ct__atc-btn {
+    width: 100%;
+    max-width: 180px;
+    padding: 0.55rem 0.75rem;
+    background: var(--color-accent, #8b7355);
+    color: #fff;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: opacity 0.15s, background-color 0.2s;
+  }
+
+  .ct__atc-btn:hover:not(:disabled) { opacity: 0.85; }
+
+  .ct__atc-btn--disabled {
+    background: #e0ddd8;
+    color: #999;
+    cursor: not-allowed;
+    opacity: 1;
+  }
+
+  /* Compare button on product card */
+  .product-card__compare-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    width: 100%;
+    padding: 0.35rem 0.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.72rem;
+    color: #bbb;
+    transition: color 0.15s;
+    margin-top: 0.15rem;
+    border-radius: 0.25rem;
+  }
+
+  .product-card__compare-btn:hover {
+    color: var(--color-accent, #8b7355);
+    background: rgba(139, 115, 85, 0.06);
+  }
+
+  .product-card__compare-btn.is-comparing {
+    color: var(--color-accent, #8b7355);
+    font-weight: 600;
+  }
+
+  .product-card__compare-btn.is-comparing .compare-icon-check { display: inline; }
+  .product-card__compare-btn.is-comparing .compare-icon-add   { display: none; }
+  .product-card__compare-btn:not(.is-comparing) .compare-icon-check { display: none; }
+  .product-card__compare-btn:not(.is-comparing) .compare-icon-add   { display: inline; }
+{% endstylesheet %}
+
+{% javascript %}
+  (function () {
+    var MAX = 4;
+    var KEY = 'compare_handles';
+    var _cache = {};
+
+    function getHandles() {
+      try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { return []; }
+    }
+    function setHandles(arr) { localStorage.setItem(KEY, JSON.stringify(arr)); }
+
+    function toggle(handle) {
+      var arr = getHandles();
+      var idx = arr.indexOf(handle);
+      if (idx > -1) { arr.splice(idx, 1); }
+      else if (arr.length < MAX) { arr.push(handle); }
+      setHandles(arr);
+    }
+
+    function fetchProduct(handle) {
+      if (_cache[handle]) return Promise.resolve(_cache[handle]);
+      return fetch('/products/' + handle + '.js')
+        .then(function (r) { return r.json(); })
+        .then(function (p) { _cache[handle] = p; return p; });
+    }
+
+    function money(cents) {
+      var bar = document.getElementById('compare-bar');
+      var fmt = (bar && bar.dataset.moneyFormat) ? bar.dataset.moneyFormat : '${{amount}}';
+      var dollars = (cents / 100).toFixed(2);
+      return fmt
+        .replace('{{amount}}', dollars)
+        .replace('{{amount_no_decimals}}', String(Math.floor(cents / 100)))
+        .replace('{{amount_with_comma_separator}}', dollars.replace('.', ','))
+        .replace('{{amount_no_decimals_with_comma_separator}}', String(Math.floor(cents / 100)));
+    }
+
+    function esc(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function i18n(key) {
+      var bar = document.getElementById('compare-bar');
+      return bar ? (bar.dataset[key] || '') : '';
+    }
+
+    function syncButtons() {
+      var handles = getHandles();
+      var labelAdd   = i18n('i18nAdd')   || 'Compare';
+      var labelAdded = i18n('i18nAdded') || 'Added';
+      document.querySelectorAll('[data-compare-toggle]').forEach(function (btn) {
+        var h = btn.dataset.productHandle;
+        var active = handles.indexOf(h) > -1;
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        btn.classList.toggle('is-comparing', active);
+        var lbl = btn.querySelector('[data-compare-text]');
+        if (lbl) lbl.textContent = active ? labelAdded : labelAdd;
+      });
+    }
+
+    function renderBar() {
+      var bar      = document.getElementById('compare-bar');
+      var listEl   = document.getElementById('compare-bar-products');
+      var countEl  = document.getElementById('compare-bar-count');
+      var openBtn  = document.getElementById('compare-bar-open');
+      if (!bar || !listEl) return;
+
+      var handles = getHandles();
+      if (handles.length === 0) {
+        bar.hidden = true;
+        document.body.style.paddingBottom = '';
+        return;
+      }
+
+      bar.hidden = false;
+      document.body.style.paddingBottom = bar.offsetHeight + 'px';
+
+      if (countEl) {
+        var single = i18n('i18nProduct')  || 'product selected';
+        var plural = i18n('i18nProducts') || 'products selected';
+        countEl.textContent = handles.length + ' ' + (handles.length === 1 ? single : plural);
+      }
+
+      if (openBtn) openBtn.disabled = handles.length < 2;
+
+      var removeLabel = i18n('i18nRemove') || 'Remove';
+      Promise.all(handles.map(fetchProduct)).then(function (products) {
+        listEl.innerHTML = products.map(function (p) {
+          var imgSrc = (p.featured_image || '').replace(/(\?|$)/, '?width=80&');
+          return '<div class="compare-bar__product" data-handle="' + p.handle + '">' +
+            '<img src="' + esc(imgSrc) + '" alt="' + esc(p.title) + '" class="compare-bar__thumb" loading="lazy">' +
+            '<span class="compare-bar__product-name">' + esc(p.title) + '</span>' +
+            '<button type="button" class="compare-bar__remove" data-remove-handle="' + p.handle + '" aria-label="' + esc(removeLabel + ' ' + p.title) + '">' +
+              '<svg width="10" height="10" viewBox="0 0 10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="1" y1="1" x2="9" y2="9"/><line x1="9" y1="1" x2="1" y2="9"/></svg>' +
+            '</button>' +
+          '</div>';
+        }).join('');
+        document.body.style.paddingBottom = bar.offsetHeight + 'px';
+      });
+    }
+
+    function openModal() {
+      var handles = getHandles();
+      if (handles.length < 2) return;
+      var modal = document.getElementById('compare-modal');
+      var body  = document.getElementById('compare-modal-body');
+      if (!modal || !body) return;
+
+      modal.hidden = false;
+      document.body.classList.add('compare-open');
+      modal.focus();
+
+      body.innerHTML = '<div class="compare-modal__loading"><div class="compare-modal__spinner"></div></div>';
+
+      Promise.all(handles.map(fetchProduct)).then(function (products) {
+        body.innerHTML = buildTable(products);
+        initTableEvents(body, products);
+      }).catch(function () {
+        body.innerHTML = '<p class="compare-modal__error">Unable to load products. Please try again.</p>';
+      });
+    }
+
+    function closeModal() {
+      var modal = document.getElementById('compare-modal');
+      if (modal) modal.hidden = true;
+      document.body.classList.remove('compare-open');
+    }
+
+    function buildTable(products) {
+      var count = products.length;
+      var countAttr = 'style="--count:' + count + '"';
+
+      // Collect all unique option names
+      var allOptions = [];
+      products.forEach(function (p) {
+        (p.options || []).forEach(function (opt) {
+          if (allOptions.indexOf(opt) === -1) allOptions.push(opt);
+        });
+      });
+
+      // Header cells
+      var headerCells = products.map(function (p, i) {
+        var imgSrc = (p.featured_image || '').replace(/(\?|$)/, '?width=400&');
+        var priceHtml;
+        if (p.compare_at_price_min && p.compare_at_price_min > p.price_min) {
+          priceHtml = '<s class="ct__old">' + money(p.compare_at_price_min) + '</s>' +
+                      '<span class="ct__sale">' + money(p.price_min) + '</span>';
+        } else {
+          var priceStr = p.price_varies ? ('From ' + money(p.price_min)) : money(p.price);
+          priceHtml = '<span>' + priceStr + '</span>';
+        }
+        return '<div class="ct__hcell" data-product-col="' + i + '">' +
+          '<a href="' + esc(p.url) + '" class="ct__product-link">' +
+            '<div class="ct__img-wrap"><img src="' + esc(imgSrc) + '" alt="' + esc(p.title) + '" class="ct__img" loading="lazy"></div>' +
+            '<div class="ct__product-title">' + esc(p.title) + '</div>' +
+          '</a>' +
+          '<div class="ct__product-price">' + priceHtml + '</div>' +
+        '</div>';
+      }).join('');
+
+      var rows = '';
+
+      // Availability
+      rows += buildRow(i18n('i18nAvailability') || 'Availability', products, count, function (p) {
+        var inStock  = i18n('i18nInStock')  || 'In stock';
+        var soldOut  = i18n('i18nSoldOut')  || 'Sold out';
+        return p.available
+          ? '<span class="ct__badge ct__badge--avail">' + esc(inStock) + '</span>'
+          : '<span class="ct__badge ct__badge--unavail">' + esc(soldOut) + '</span>';
+      });
+
+      // Brand
+      if (products.some(function (p) { return p.vendor; })) {
+        rows += buildRow(i18n('i18nBrand') || 'Brand', products, count, function (p) {
+          return p.vendor ? esc(p.vendor) : '&mdash;';
+        });
+      }
+
+      // Product type
+      if (products.some(function (p) { return p.type; })) {
+        rows += buildRow(i18n('i18nProductType') || 'Type', products, count, function (p) {
+          return p.type ? esc(p.type) : '&mdash;';
+        });
+      }
+
+      // Option rows
+      allOptions.forEach(function (optName) {
+        var cells = products.map(function (p, i) {
+          var optIdx = (p.options || []).indexOf(optName);
+          if (optIdx === -1) return '<div class="ct__cell">&mdash;</div>';
+
+          var values = [];
+          p.variants.forEach(function (v) {
+            var val = v['option' + (optIdx + 1)];
+            if (values.indexOf(val) === -1) values.push(val);
+          });
+
+          if (values.length === 1) {
+            return '<div class="ct__cell">' + esc(values[0]) + '</div>';
+          }
+
+          var firstAvail = null;
+          for (var vi = 0; vi < p.variants.length; vi++) {
+            if (p.variants[vi].available) { firstAvail = p.variants[vi]; break; }
+          }
+          var defaultVal = firstAvail ? firstAvail['option' + (optIdx + 1)] : values[0];
+
+          var opts = values.map(function (v) {
+            return '<option value="' + esc(v) + '"' + (v === defaultVal ? ' selected' : '') + '>' + esc(v) + '</option>';
+          }).join('');
+
+          return '<div class="ct__cell">' +
+            '<select class="ct__select" data-option-index="' + optIdx + '" data-product-col="' + i + '" aria-label="' + esc(optName) + '">' +
+            opts + '</select></div>';
+        }).join('');
+
+        rows += '<div class="ct__row">' +
+          '<div class="ct__label">' + esc(optName) + '</div>' +
+          '<div class="ct__cells" ' + countAttr + '>' + cells + '</div>' +
+        '</div>';
+      });
+
+      // Description
+      if (products.some(function (p) { return p.description; })) {
+        rows += buildRow(i18n('i18nDescription') || 'Description', products, count, function (p) {
+          if (!p.description) return '&mdash;';
+          var plain = p.description.replace(/<[^>]*>/g, '').trim();
+          return '<p class="ct__desc">' + esc(plain.slice(0, 200)) + (plain.length > 200 ? '…' : '') + '</p>';
+        });
+      }
+
+      // Add to cart row
+      var atcLabel = i18n('i18nAddToCart') || 'Add to cart';
+      var soldOut  = i18n('i18nSoldOut')   || 'Sold out';
+      var atcCells = products.map(function (p, i) {
+        var variant = null;
+        for (var vi = 0; vi < p.variants.length; vi++) {
+          if (p.variants[vi].available) { variant = p.variants[vi]; break; }
+        }
+        if (!variant) variant = p.variants[0];
+        var avail = p.available && variant && variant.available !== false;
+        return '<div class="ct__cell">' +
+          '<button class="ct__atc-btn' + (avail ? '' : ' ct__atc-btn--disabled') + '"' +
+            ' data-compare-atc' +
+            ' data-product-col="' + i + '"' +
+            ' data-variant-id="' + (variant ? variant.id : '') + '"' +
+            (avail ? '' : ' disabled') + '>' +
+            (avail ? esc(atcLabel) : esc(soldOut)) +
+          '</button></div>';
+      }).join('');
+
+      rows += '<div class="ct__row ct__row--atc">' +
+        '<div class="ct__label"></div>' +
+        '<div class="ct__cells" ' + countAttr + '>' + atcCells + '</div>' +
+      '</div>';
+
+      return '<div class="compare-table" ' + countAttr + '>' +
+        '<div class="ct__header">' +
+          '<div class="ct__hlabel"></div>' +
+          '<div class="ct__hcells" ' + countAttr + '>' + headerCells + '</div>' +
+        '</div>' +
+        '<div class="ct__body">' + rows + '</div>' +
+      '</div>';
+    }
+
+    function buildRow(label, products, count, cellFn) {
+      var cells = products.map(function (p) {
+        return '<div class="ct__cell">' + cellFn(p) + '</div>';
+      }).join('');
+      return '<div class="ct__row">' +
+        '<div class="ct__label">' + esc(label) + '</div>' +
+        '<div class="ct__cells" style="--count:' + count + '">' + cells + '</div>' +
+      '</div>';
+    }
+
+    function initTableEvents(body, products) {
+      body.addEventListener('change', function (e) {
+        var sel = e.target.closest('.ct__select');
+        if (!sel) return;
+        var colIdx = parseInt(sel.dataset.productCol, 10);
+        var product = products[colIdx];
+        if (!product) return;
+
+        var allSelects = body.querySelectorAll('.ct__select[data-product-col="' + colIdx + '"]');
+        var selections = {};
+        allSelects.forEach(function (s) {
+          selections[parseInt(s.dataset.optionIndex, 10)] = s.value;
+        });
+
+        var variant = null;
+        for (var vi = 0; vi < product.variants.length; vi++) {
+          var v = product.variants[vi];
+          var matches = Object.keys(selections).every(function (idx) {
+            return v['option' + (parseInt(idx, 10) + 1)] === selections[idx];
+          });
+          if (matches) { variant = v; break; }
+        }
+
+        var atcBtn = body.querySelector('.ct__atc-btn[data-product-col="' + colIdx + '"]');
+        if (atcBtn && variant) {
+          atcBtn.dataset.variantId = variant.id;
+          var avail = variant.available !== false;
+          var atcLabel = i18n('i18nAddToCart') || 'Add to cart';
+          var soldOut  = i18n('i18nSoldOut')   || 'Sold out';
+          atcBtn.textContent = avail ? atcLabel : soldOut;
+          atcBtn.disabled = !avail;
+          atcBtn.classList.toggle('ct__atc-btn--disabled', !avail);
+        }
+      });
+
+      body.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-compare-atc]');
+        if (!btn || btn.disabled) return;
+        var variantId = btn.dataset.variantId;
+        if (!variantId) return;
+
+        var origText = btn.textContent;
+        btn.disabled = true;
+
+        fetch('/cart/add.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+          body: JSON.stringify({ id: parseInt(variantId, 10), quantity: 1 })
+        })
+        .then(function () {
+          return fetch('/cart.js', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (cart) {
+          btn.textContent = i18n('i18nAddedToCart') || 'Added!';
+          btn.style.backgroundColor = '#2d7a3a';
+          btn.style.borderColor = '#2d7a3a';
+          var desktopBadge = document.querySelector('.header__cart-count');
+          var mobileBadge  = document.querySelector('.mobile-menu__cart-count');
+          if (cart.item_count > 0) {
+            if (desktopBadge) { desktopBadge.textContent = cart.item_count; desktopBadge.style.display = ''; }
+            if (mobileBadge)  { mobileBadge.textContent = '(' + cart.item_count + ')'; mobileBadge.style.display = ''; }
+          }
+        })
+        .catch(function () {
+          btn.textContent = 'Error';
+          btn.style.backgroundColor = '#c00';
+        })
+        .finally(function () {
+          setTimeout(function () {
+            btn.disabled = false;
+            btn.textContent = origText;
+            btn.style.backgroundColor = '';
+            btn.style.borderColor = '';
+          }, 2200);
+        });
+      });
+    }
+
+    document.addEventListener('click', function (e) {
+      var toggleBtn = e.target.closest('[data-compare-toggle]');
+      if (toggleBtn) {
+        var handle  = toggleBtn.dataset.productHandle;
+        var handles = getHandles();
+        if (handles.indexOf(handle) === -1 && handles.length >= MAX) {
+          var bar = document.getElementById('compare-bar');
+          if (bar) {
+            bar.classList.add('compare-bar--shake');
+            setTimeout(function () { bar.classList.remove('compare-bar--shake'); }, 500);
+          }
+          return;
+        }
+        toggle(handle);
+        syncButtons();
+        renderBar();
+        return;
+      }
+
+      if (e.target.closest('[data-remove-handle]')) {
+        var h   = e.target.closest('[data-remove-handle]').dataset.removeHandle;
+        var arr = getHandles();
+        var i   = arr.indexOf(h);
+        if (i > -1) arr.splice(i, 1);
+        setHandles(arr);
+        syncButtons();
+        renderBar();
+        return;
+      }
+
+      if (e.target.closest('#compare-bar-clear')) {
+        setHandles([]);
+        syncButtons();
+        renderBar();
+        return;
+      }
+
+      if (e.target.closest('#compare-bar-open')) {
+        openModal();
+        return;
+      }
+
+      if (e.target.closest('#compare-modal-close') || e.target.id === 'compare-modal-backdrop') {
+        closeModal();
+      }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    syncButtons();
+    renderBar();
+  })();
+{% endjavascript %}

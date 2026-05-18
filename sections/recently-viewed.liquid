@@ -1,0 +1,329 @@
+{%- assign rv_heading = section.settings.heading | default: 'Recently viewed' -%}
+{%- assign rv_max = section.settings.max_products | default: 4 -%}
+
+<div
+  class="recently-viewed full-width"
+  hidden
+  data-rv-section
+  data-current-handle="{%- if product -%}{{ product.handle | escape }}{%- endif -%}"
+  data-max-products="{{ rv_max }}"
+  data-money-format="{{ shop.money_format | escape }}"
+  data-show-empty-state="{{ section.settings.show_empty_state }}"
+  data-i18n-add-to-cart="{{ 'sections.product_shelf.add_to_cart' | t | escape }}"
+  data-i18n-sold-out="{{ 'sections.product_shelf.sold_out' | t | escape }}"
+  data-i18n-sale="{{ 'products.badge.sale' | t | escape }}"
+  data-i18n-empty="{{ 'sections.recently_viewed.empty' | t | escape }}"
+  data-i18n-browse="{{ 'sections.recently_viewed.browse' | t | escape }}"
+>
+  <div class="recently-viewed__inner">
+    {%- unless rv_heading == blank -%}
+      <h2 class="recently-viewed__heading">{{ rv_heading | escape }}</h2>
+    {%- endunless -%}
+    <div class="recently-viewed__grid" aria-live="polite"></div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .recently-viewed {
+    padding: 3.5rem 0 4.5rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.07);
+  }
+
+  .recently-viewed__inner {
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: 0 var(--page-margin);
+  }
+
+  .recently-viewed__heading {
+    font-size: clamp(1.25rem, 3vw, 1.5rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 1.75rem;
+  }
+
+  .recently-viewed__grid {
+    display: grid;
+    grid-template-columns: repeat(var(--rv-cols, 4), 1fr);
+    gap: 1.5rem;
+  }
+
+  /* Skeleton loader */
+  .rv-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+  }
+
+  .rv-skeleton__img {
+    aspect-ratio: 1 / 1;
+    border-radius: 0.75rem;
+    background: linear-gradient(90deg, #f0ede8 25%, #e5e1db 50%, #f0ede8 75%);
+    background-size: 200% 100%;
+    animation: rv-shimmer 1.4s ease-in-out infinite;
+  }
+
+  .rv-skeleton__line {
+    height: 0.875rem;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #f0ede8 25%, #e5e1db 50%, #f0ede8 75%);
+    background-size: 200% 100%;
+    animation: rv-shimmer 1.4s ease-in-out infinite;
+  }
+
+  .rv-skeleton__line--short { width: 55%; }
+
+  .rv-skeleton__line--btn {
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    margin-top: 0.25rem;
+  }
+
+  @keyframes rv-shimmer {
+    0%   { background-position:  200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Empty state */
+  .rv-empty {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 1rem;
+    gap: 1rem;
+  }
+
+  .rv-empty__icon { opacity: 0.15; }
+
+  .rv-empty__text {
+    font-size: 0.9375rem;
+    color: #888;
+    margin: 0;
+    max-width: 22rem;
+    line-height: 1.6;
+  }
+
+  .rv-empty__cta {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.625rem 1.375rem;
+    border: 1.5px solid rgba(0, 0, 0, 0.18);
+    border-radius: 0.5rem;
+    text-decoration: none;
+    color: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: border-color 0.15s, background 0.15s;
+    margin-top: 0.25rem;
+  }
+
+  .rv-empty__cta:hover {
+    border-color: rgba(0, 0, 0, 0.35);
+    background: rgba(0, 0, 0, 0.02);
+  }
+
+  @media (max-width: 900px) {
+    .recently-viewed__grid { --rv-cols: 2; }
+  }
+
+  @media (max-width: 480px) {
+    .recently-viewed { padding: 2rem 0 3rem; }
+    .recently-viewed__grid { gap: 1rem; }
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  (function () {
+    document.querySelectorAll('[data-rv-section]').forEach(function (section) {
+      var grid = section.querySelector('.recently-viewed__grid');
+      if (!grid) return;
+
+      var currentHandle  = section.dataset.currentHandle  || '';
+      var maxProducts    = parseInt(section.dataset.maxProducts || '4', 10);
+      var moneyFmt       = section.dataset.moneyFormat    || '${{amount}}';
+      var showEmptyState = section.dataset.showEmptyState === 'true';
+      var addTxt         = section.dataset.i18nAddToCart  || 'Add to cart';
+      var soldTxt        = section.dataset.i18nSoldOut    || 'Sold out';
+      var saleTxt        = section.dataset.i18nSale       || 'Sale';
+      var emptyTxt       = section.dataset.i18nEmpty      || 'Browse our store and the products you view will appear here.';
+      var browseTxt      = section.dataset.i18nBrowse     || 'Browse all products';
+
+      /* ── Helpers ──────────────────────────────────── */
+      function money(cents) {
+        var n = (cents / 100).toFixed(2);
+        return moneyFmt
+          .replace('{{amount}}',                             n)
+          .replace('{{amount_no_decimals}}',                 String(Math.floor(cents / 100)))
+          .replace('{{amount_with_comma_separator}}',        n.replace('.', ','))
+          .replace('{{amount_no_decimals_with_comma_separator}}', String(Math.floor(cents / 100)));
+      }
+
+      function esc(s) {
+        return String(s || '')
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      /* ── localStorage ────────────────────────────── */
+      function getHandles() {
+        try { return JSON.parse(localStorage.getItem('rv_handles') || '[]'); }
+        catch (e) { return []; }
+      }
+
+      /* ── Product fetch (with cache) ──────────────── */
+      var _cache = {};
+      function fetchProduct(handle) {
+        if (_cache[handle]) return Promise.resolve(_cache[handle]);
+        return fetch('/products/' + handle + '.js', {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+          .then(function (r) {
+            if (!r.ok) throw new Error('not found');
+            return r.json();
+          })
+          .then(function (p) { _cache[handle] = p; return p; });
+      }
+
+      /* ── Card builder ────────────────────────────── */
+      function buildCard(p) {
+        var variant   = (p.variants && p.variants[0]) || {};
+        var variantId = variant.id || '';
+        var price     = variant.price          || p.price             || 0;
+        var compareAt = variant.compare_at_price || p.compare_at_price || 0;
+        var isOnSale  = compareAt > price;
+        var available = p.available !== false;
+        var rawImg    = p.featured_image || (p.images && p.images[0]);
+        var imgSrc    = rawImg ? rawImg.replace(/(\?|$)/, '?width=600&') : '';
+
+        var badgesHtml = '';
+        if (!available) {
+          badgesHtml = '<div class="product-card__badges"><span class="product-card__badge product-card__badge--sold-out">' + esc(soldTxt) + '</span></div>';
+        } else if (isOnSale) {
+          badgesHtml = '<div class="product-card__badges"><span class="product-card__badge product-card__badge--sale">' + esc(saleTxt) + '</span></div>';
+        }
+
+        var priceHtml = isOnSale
+          ? '<s class="product-card__price-compare">' + money(compareAt) + '</s>' +
+            '<span class="product-card__price-sale">' + money(price) + '</span>'
+          : '<span class="product-card__price-regular">' + money(price) + '</span>';
+
+        var atcHtml = available
+          ? '<form action="/cart/add" method="post" class="product-card__form">' +
+              '<input type="hidden" name="id" value="' + esc(String(variantId)) + '">' +
+              '<button type="submit" class="product-card__add-btn" aria-label="' + esc(addTxt + ': ' + p.title) + '">' +
+                esc(addTxt) +
+              '</button>' +
+            '</form>'
+          : '<button class="product-card__add-btn product-card__add-btn--disabled" disabled>' +
+              esc(soldTxt) +
+            '</button>';
+
+        return '<article class="product-card" data-product-id="' + esc(String(p.id)) + '">' +
+          '<a href="' + esc(p.url) + '" class="product-card__media" tabindex="-1" aria-hidden="true">' +
+            '<div class="product-card__image-wrapper">' +
+              (imgSrc ? '<img src="' + esc(imgSrc) + '" alt="' + esc(p.title) + '" class="product-card__image product-card__image--primary" loading="lazy">' : '') +
+            '</div>' +
+            badgesHtml +
+          '</a>' +
+          '<div class="product-card__info">' +
+            '<a href="' + esc(p.url) + '" class="product-card__title-link">' +
+              '<h3 class="product-card__title">' + esc(p.title) + '</h3>' +
+            '</a>' +
+            '<div class="product-card__price">' + priceHtml + '</div>' +
+            atcHtml +
+          '</div>' +
+        '</article>';
+      }
+
+      /* ── Skeleton ────────────────────────────────── */
+      function skeleton() {
+        return '<div class="rv-skeleton" aria-hidden="true">' +
+          '<div class="rv-skeleton__img"></div>' +
+          '<div class="rv-skeleton__line"></div>' +
+          '<div class="rv-skeleton__line rv-skeleton__line--short"></div>' +
+          '<div class="rv-skeleton__line rv-skeleton__line--btn"></div>' +
+        '</div>';
+      }
+
+      /* ── Empty state ─────────────────────────────── */
+      function emptyState() {
+        return '<div class="rv-empty">' +
+          '<svg class="rv-empty__icon" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>' +
+            '<path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>' +
+          '</svg>' +
+          '<p class="rv-empty__text">' + esc(emptyTxt) + '</p>' +
+          '<a href="/collections/all" class="rv-empty__cta">' + esc(browseTxt) + '</a>' +
+        '</div>';
+      }
+
+      /* ── Init ────────────────────────────────────── */
+      var handles = getHandles()
+        .filter(function (h) { return h !== currentHandle; })
+        .slice(0, maxProducts);
+
+      if (handles.length === 0) {
+        if (showEmptyState) {
+          grid.innerHTML = emptyState();
+          section.removeAttribute('hidden');
+        }
+        return;
+      }
+
+      grid.innerHTML = handles.map(skeleton).join('');
+      section.removeAttribute('hidden');
+
+      Promise.all(handles.map(function (h) {
+        return fetchProduct(h).catch(function () { return null; });
+      })).then(function (products) {
+        products = products.filter(Boolean);
+        if (products.length === 0) {
+          if (showEmptyState) {
+            grid.innerHTML = emptyState();
+          } else {
+            section.setAttribute('hidden', '');
+          }
+          return;
+        }
+        grid.innerHTML = products.map(buildCard).join('');
+      });
+    });
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "t:sections.recently_viewed.name",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:labels.heading",
+      "default": "Recently viewed"
+    },
+    {
+      "type": "range",
+      "id": "max_products",
+      "label": "t:sections.recently_viewed.max_products",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "checkbox",
+      "id": "show_empty_state",
+      "label": "t:sections.recently_viewed.show_empty_state",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.recently_viewed.name"
+    }
+  ]
+}
+{% endschema %}
