@@ -1,0 +1,709 @@
+<div class="reviews-page">
+
+  <div class="reviews-page__hero full-width">
+    <div class="reviews-page__hero-inner">
+      <p class="reviews-page__eyebrow">{{ 'sections.reviews.eyebrow' | t }}</p>
+      <h1 class="reviews-page__title">{{ section.settings.heading | escape }}</h1>
+      <p class="reviews-page__subtitle">{{ section.settings.subheading | escape }}</p>
+
+      <div class="reviews-page__stats">
+        <div class="reviews-page__stat">
+          <span class="reviews-page__stat-value">{{ section.settings.overall_rating | escape }}</span>
+          <div class="reviews-page__hero-stars" aria-hidden="true">
+            {%- for i in (1..5) -%}
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            {%- endfor -%}
+          </div>
+          <span class="reviews-page__stat-label">{{ 'sections.reviews.average_rating' | t }}</span>
+        </div>
+
+        <div class="reviews-page__stat-divider" aria-hidden="true"></div>
+
+        <div class="reviews-page__stat">
+          <span class="reviews-page__stat-value">{{ section.settings.total_reviews | escape }}</span>
+          <span class="reviews-page__stat-label">{{ 'sections.reviews.total_reviews_label' | t }}</span>
+        </div>
+
+        <div class="reviews-page__stat-divider" aria-hidden="true"></div>
+
+        <div class="reviews-page__stat">
+          <span class="reviews-page__stat-value">{{ section.settings.recommendation_pct | escape }}</span>
+          <span class="reviews-page__stat-label">{{ 'sections.reviews.recommend_label' | t }}</span>
+        </div>
+      </div>
+
+      {%- if section.settings.overall_rating != blank -%}
+        <div class="reviews-page__breakdown">
+          {%- assign bars = '5,4,3,2,1' | split: ',' -%}
+          {%- assign bar_widths = section.settings.bar_5 | append: ',' | append: section.settings.bar_4 | append: ',' | append: section.settings.bar_3 | append: ',' | append: section.settings.bar_2 | append: ',' | append: section.settings.bar_1 | split: ',' -%}
+          {%- for star in bars -%}
+            {%- assign bar_index = forloop.index0 -%}
+            {%- assign bar_pct = bar_widths[bar_index] -%}
+            <div class="reviews-page__bar-row">
+              <span class="reviews-page__bar-label">{{ star }}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              <div class="reviews-page__bar-track">
+                <div class="reviews-page__bar-fill" style="--pct: {{ bar_pct }}%"></div>
+              </div>
+              <span class="reviews-page__bar-pct">{{ bar_pct }}%</span>
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+
+  {%- if section.blocks.size > 0 -%}
+    {%- assign avatar_bgs = '#f0ece4,#ddeaf5,#e8e0f5,#d8f0e8,#f5e0ec' | split: ',' -%}
+    <div class="reviews-page__grid-wrap">
+      <div class="reviews-page__grid reviews-page__grid--{{ section.settings.columns_desktop }}">
+        {%- for block in section.blocks -%}
+          {%- assign rating = block.settings.rating -%}
+          {%- assign avatar_index = forloop.index0 | modulo: 5 -%}
+          {%- assign avatar_bg = avatar_bgs[avatar_index] -%}
+          {%- assign author_initial = block.settings.author | slice: 0 | upcase -%}
+          <article class="review-card" {{ block.shopify_attributes }}>
+            <div class="review-card__top">
+              <div class="review-card__stars" aria-label="{{ rating }} {{ 'sections.reviews.out_of_five' | t }}">
+                {%- for i in (1..5) -%}
+                  {%- if i <= rating -%}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  {%- else -%}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+              {%- if block.settings.product_name != blank -%}
+                <span class="review-card__product">{{ block.settings.product_name | escape }}</span>
+              {%- endif -%}
+            </div>
+
+            {%- if block.settings.title != blank -%}
+              <h3 class="review-card__title">{{ block.settings.title | escape }}</h3>
+            {%- endif -%}
+
+            <p class="review-card__text">{{ block.settings.text | escape }}</p>
+
+            <div class="review-card__footer">
+              <div class="review-card__avatar" style="--avatar-bg: {{ avatar_bg }};" aria-hidden="true">
+                {{ author_initial }}
+              </div>
+              <div class="review-card__meta">
+                <span class="review-card__author">{{ block.settings.author | escape }}</span>
+                {%- if block.settings.location != blank or block.settings.date != blank -%}
+                  <span class="review-card__details">
+                    {%- if block.settings.location != blank -%}{{ block.settings.location | escape }}{%- endif -%}
+                    {%- if block.settings.location != blank and block.settings.date != blank -%} &middot; {%- endif -%}
+                    {%- if block.settings.date != blank -%}{{ block.settings.date | escape }}{%- endif -%}
+                  </span>
+                {%- endif -%}
+              </div>
+              {%- if block.settings.verified -%}
+                <span class="review-card__verified">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  {{ 'sections.reviews.verified' | t }}
+                </span>
+              {%- endif -%}
+            </div>
+          </article>
+        {%- endfor -%}
+      </div>
+    </div>
+  {%- endif -%}
+
+  {%- if section.settings.cta_label != blank -%}
+    <div class="reviews-page__cta full-width">
+      <div class="reviews-page__cta-inner">
+        <p class="reviews-page__cta-text">{{ section.settings.cta_text | escape }}</p>
+        <a href="{{ section.settings.cta_url | default: routes.all_products_collection_url }}" class="btn btn--primary">
+          {{ section.settings.cta_label | escape }}
+        </a>
+      </div>
+    </div>
+  {%- endif -%}
+
+</div>
+
+{% stylesheet %}
+  /* ── Hero ── */
+  .reviews-page__hero {
+    background: var(--color-accent);
+    color: var(--color-accent-foreground);
+    padding: 5rem var(--page-margin) 4rem;
+  }
+
+  .reviews-page__hero-inner {
+    max-width: var(--page-width);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.25rem;
+  }
+
+  .reviews-page__eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    opacity: 0.65;
+    margin: 0;
+  }
+
+  .reviews-page__title {
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin: 0;
+  }
+
+  .reviews-page__subtitle {
+    font-size: 1.0625rem;
+    opacity: 0.7;
+    margin: 0;
+    max-width: 40ch;
+    line-height: 1.6;
+  }
+
+  /* Stats row */
+  .reviews-page__stats {
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .reviews-page__stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .reviews-page__stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .reviews-page__hero-stars {
+    display: flex;
+    gap: 2px;
+    color: #f59e0b;
+  }
+
+  .reviews-page__stat-label {
+    font-size: 0.75rem;
+    opacity: 0.6;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .reviews-page__stat-divider {
+    width: 1px;
+    height: 3rem;
+    background: currentColor;
+    opacity: 0.2;
+    flex-shrink: 0;
+  }
+
+  /* Rating breakdown bars */
+  .reviews-page__breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 22rem;
+    margin-top: 0.75rem;
+  }
+
+  .reviews-page__bar-row {
+    display: grid;
+    grid-template-columns: 1rem 0.875rem 1fr 2.5rem;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    opacity: 0.85;
+  }
+
+  .reviews-page__bar-label {
+    text-align: right;
+    font-weight: 600;
+  }
+
+  .reviews-page__bar-track {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .reviews-page__bar-fill {
+    height: 100%;
+    width: var(--pct, 0%);
+    background: #f59e0b;
+    border-radius: 3px;
+  }
+
+  .reviews-page__bar-pct {
+    opacity: 0.6;
+    font-size: 0.7rem;
+  }
+
+  /* ── Grid ── */
+  .reviews-page__grid-wrap {
+    padding: 4rem 0 5rem;
+  }
+
+  .reviews-page__grid {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .reviews-page__grid--2 { grid-template-columns: repeat(2, 1fr); }
+  .reviews-page__grid--3 { grid-template-columns: repeat(3, 1fr); }
+  .reviews-page__grid--4 { grid-template-columns: repeat(4, 1fr); }
+
+  /* ── Review card ── */
+  .review-card {
+    background: #fafaf8;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    transition: box-shadow var(--transition-base), transform var(--transition-base);
+  }
+
+  .review-card:hover {
+    box-shadow: var(--shadow-card);
+    transform: translateY(-2px);
+  }
+
+  .review-card__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .review-card__stars {
+    display: flex;
+    gap: 2px;
+    color: #f59e0b;
+    flex-shrink: 0;
+  }
+
+  .review-card__product {
+    font-size: 0.7rem;
+    background: rgba(0, 0, 0, 0.06);
+    padding: 0.2rem 0.5rem;
+    border-radius: 2rem;
+    color: #666;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 9rem;
+  }
+
+  .review-card__title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  .review-card__text {
+    font-size: 0.875rem;
+    line-height: 1.7;
+    opacity: 0.72;
+    margin: 0;
+    flex: 1;
+  }
+
+  .review-card__footer {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-top: 0.875rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    margin-top: auto;
+  }
+
+  .review-card__avatar {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background-color: var(--avatar-bg, #f0ece4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .review-card__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .review-card__author {
+    font-size: 0.875rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .review-card__details {
+    font-size: 0.75rem;
+    opacity: 0.45;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .review-card__verified {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.7rem;
+    color: #2d7a3a;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── CTA strip ── */
+  .reviews-page__cta {
+    background: #fafaf8;
+    border-top: 1px solid rgba(0, 0, 0, 0.07);
+    padding: 3.5rem var(--page-margin);
+  }
+
+  .reviews-page__cta-inner {
+    max-width: var(--page-width);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .reviews-page__cta-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+    max-width: 36ch;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .reviews-page__stats { gap: 1.5rem; }
+
+    .reviews-page__grid--3,
+    .reviews-page__grid--4 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .reviews-page__stats {
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .reviews-page__stat-divider { display: none; }
+
+    .reviews-page__grid--2,
+    .reviews-page__grid--3,
+    .reviews-page__grid--4 {
+      grid-template-columns: 1fr;
+    }
+
+    .reviews-page__cta-inner {
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.reviews",
+  "blocks": [
+    {
+      "type": "review",
+      "name": "t:general.review",
+      "settings": [
+        {
+          "type": "range",
+          "id": "rating",
+          "label": "t:labels.rating",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "default": 5
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "t:labels.review_title"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "t:labels.review_text",
+          "default": "Absolutely love this product. The quality exceeded my expectations and shipping was incredibly fast."
+        },
+        {
+          "type": "text",
+          "id": "author",
+          "label": "t:labels.author",
+          "default": "Happy Customer"
+        },
+        {
+          "type": "text",
+          "id": "location",
+          "label": "t:labels.location"
+        },
+        {
+          "type": "text",
+          "id": "date",
+          "label": "t:labels.date"
+        },
+        {
+          "type": "text",
+          "id": "product_name",
+          "label": "t:labels.product_name"
+        },
+        {
+          "type": "checkbox",
+          "id": "verified",
+          "label": "t:labels.verified_purchase",
+          "default": true
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:labels.hero"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:labels.heading",
+      "default": "Loved by thousands of customers"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "t:labels.subheading",
+      "default": "Real reviews from real people who love what we make."
+    },
+    {
+      "type": "text",
+      "id": "overall_rating",
+      "label": "t:labels.overall_rating",
+      "default": "4.9"
+    },
+    {
+      "type": "text",
+      "id": "total_reviews",
+      "label": "t:labels.total_reviews",
+      "default": "2,400+"
+    },
+    {
+      "type": "text",
+      "id": "recommendation_pct",
+      "label": "t:labels.recommendation_pct",
+      "default": "98%"
+    },
+    {
+      "type": "header",
+      "content": "t:labels.rating_breakdown"
+    },
+    {
+      "type": "range",
+      "id": "bar_5",
+      "label": "t:labels.bar_5_stars",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 82
+    },
+    {
+      "type": "range",
+      "id": "bar_4",
+      "label": "t:labels.bar_4_stars",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "bar_3",
+      "label": "t:labels.bar_3_stars",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "bar_2",
+      "label": "t:labels.bar_2_stars",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "bar_1",
+      "label": "t:labels.bar_1_star",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 1
+    },
+    {
+      "type": "header",
+      "content": "t:labels.grid"
+    },
+    {
+      "type": "select",
+      "id": "columns_desktop",
+      "label": "t:labels.columns_desktop",
+      "default": "3",
+      "options": [
+        { "value": "2", "label": "2" },
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "t:labels.call_to_action"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "t:labels.text",
+      "default": "Ready to find your new favourite?"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "t:labels.button_label",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "t:labels.button_url"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:general.reviews",
+      "blocks": [
+        {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "title": "Exceeded all my expectations",
+            "text": "I was a little hesitant to order online but I'm so glad I did. The quality is outstanding — it looks even better in person than in the photos. Fast shipping and beautifully packaged too.",
+            "author": "Sarah M.",
+            "location": "New York, US",
+            "date": "March 2024",
+            "product_name": "Linen Table Runner",
+            "verified": true
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "title": "Perfect gift, everyone loved it",
+            "text": "Bought this as a birthday gift and it was a huge hit. The craftsmanship is remarkable for the price point. Already ordered two more for upcoming occasions.",
+            "author": "James T.",
+            "location": "London, UK",
+            "date": "February 2024",
+            "product_name": "Gold Hoop Earrings",
+            "verified": true
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "title": "My new everyday essential",
+            "text": "Comfortable, stylish and holds up incredibly well after multiple washes. The fit is true to size and the fabric feels premium. Genuinely one of my favourite purchases this year.",
+            "author": "Priya K.",
+            "location": "Toronto, CA",
+            "date": "January 2024",
+            "product_name": "Relaxed Linen Shirt",
+            "verified": true
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "rating": 4,
+            "title": "Great quality, fast delivery",
+            "text": "Really happy with my order. The item is exactly as described and arrived well ahead of the estimated date. Packaging was eco-friendly and thoughtful. Would buy again.",
+            "author": "Marcus R.",
+            "location": "Sydney, AU",
+            "date": "March 2024",
+            "verified": true
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "title": "Transformed my living room",
+            "text": "Hard to believe how much one piece can change a space. The colours are rich, the texture is gorgeous, and it anchors the whole room together. Worth every penny.",
+            "author": "Elena V.",
+            "location": "Barcelona, ES",
+            "date": "February 2024",
+            "product_name": "Woven Throw Blanket",
+            "verified": true
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "title": "Obsessed with my order",
+            "text": "Customer service was incredibly helpful when I had a sizing question. The team responded within hours and the recommendation was spot on. The product itself is just stunning.",
+            "author": "Lena H.",
+            "location": "Berlin, DE",
+            "date": "January 2024",
+            "verified": true
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

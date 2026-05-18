@@ -1,0 +1,61 @@
+{
+  "sections": {
+    "promo-bar": {
+      "type": "promo-banner",
+      "settings": {
+        "text": "Free shipping on orders over $75",
+        "link_text": "Shop now",
+        "background_color": "#1a1a1a",
+        "text_color": "#ffffff"
+      }
+    },
+    "hero": {
+      "type": "hero-banner",
+      "settings": {
+        "min_height": 75,
+        "overlay_opacity": 35,
+        "text_alignment": "flex-start",
+        "text_color": "#ffffff",
+        "subheading": "New collection 2024",
+        "heading": "Curated for the modern home",
+        "body_text": "Discover our latest collections crafted with the finest materials.",
+        "button_label": "Shop now",
+        "secondary_button_label": "View collections",
+        "secondary_button_url": "/collections"
+      }
+    },
+    "featured-collections": {
+      "type": "featured-collections",
+      "settings": {
+        "heading": "Shop by category",
+        "subheading": "Explore our curated collections"
+      }
+    },
+    "product-shelf": {
+      "type": "product-shelf",
+      "settings": {
+        "heading": "Featured products",
+        "products_to_show": 20,
+        "show_price": true,
+        "show_add_to_cart": true,
+        "columns_mobile": "2"
+      }
+    },
+    "newsletter": {
+      "type": "newsletter",
+      "settings": {
+        "heading": "Stay in the loop",
+        "body_text": "Get exclusive offers, new arrivals, and insider news delivered to your inbox.",
+        "background_color": "#f5f5f0",
+        "text_color": "#1a1a1a"
+      }
+    }
+  },
+  "order": [
+    "promo-bar",
+    "hero",
+    "featured-collections",
+    "product-shelf",
+    "newsletter"
+  ]
+}

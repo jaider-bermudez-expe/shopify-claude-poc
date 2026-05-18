@@ -1,0 +1,139 @@
+{
+  "sections": {
+    "main": {
+      "type": "reviews",
+      "blocks": {
+        "review-1": {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "title": "Exceeded all my expectations",
+            "text": "I was a little hesitant to order online but I'm so glad I did. The quality is outstanding — it looks even better in person than in the photos. Fast shipping and beautifully packaged too.",
+            "author": "Sarah M.",
+            "location": "New York, US",
+            "date": "March 2024",
+            "product_name": "Linen Table Runner",
+            "verified": true
+          }
+        },
+        "review-2": {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "title": "Perfect gift, everyone loved it",
+            "text": "Bought this as a birthday gift and it was a huge hit. The craftsmanship is remarkable for the price point. Already ordered two more for upcoming occasions.",
+            "author": "James T.",
+            "location": "London, UK",
+            "date": "February 2024",
+            "product_name": "Gold Hoop Earrings",
+            "verified": true
+          }
+        },
+        "review-3": {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "title": "My new everyday essential",
+            "text": "Comfortable, stylish and holds up incredibly well after multiple washes. The fit is true to size and the fabric feels premium. Genuinely one of my favourite purchases this year.",
+            "author": "Priya K.",
+            "location": "Toronto, CA",
+            "date": "January 2024",
+            "product_name": "Relaxed Linen Shirt",
+            "verified": true
+          }
+        },
+        "review-4": {
+          "type": "review",
+          "settings": {
+            "rating": 4,
+            "title": "Great quality, fast delivery",
+            "text": "Really happy with my order. The item is exactly as described and arrived well ahead of the estimated date. Packaging was eco-friendly and thoughtful. Would buy again.",
+            "author": "Marcus R.",
+            "location": "Sydney, AU",
+            "date": "March 2024",
+            "verified": true
+          }
+        },
+        "review-5": {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "title": "Transformed my living room",
+            "text": "Hard to believe how much one piece can change a space. The colours are rich, the texture is gorgeous, and it anchors the whole room together. Worth every penny.",
+            "author": "Elena V.",
+            "location": "Barcelona, ES",
+            "date": "February 2024",
+            "product_name": "Woven Throw Blanket",
+            "verified": true
+          }
+        },
+        "review-6": {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "title": "Obsessed with my order",
+            "text": "Customer service was incredibly helpful when I had a sizing question. The team responded within hours and the recommendation was spot on. The product itself is just stunning.",
+            "author": "Lena H.",
+            "location": "Berlin, DE",
+            "date": "January 2024",
+            "verified": true
+          }
+        },
+        "review-7": {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "title": "Will be a repeat customer",
+            "text": "Second time ordering and it keeps getting better. The consistency in quality is something you rarely see anymore. My whole family has started ordering from here.",
+            "author": "Tom A.",
+            "location": "Chicago, US",
+            "date": "April 2024",
+            "verified": true
+          }
+        },
+        "review-8": {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "title": "Exactly what I was looking for",
+            "text": "Searched everywhere for something like this and nothing came close. The attention to detail is incredible. Arrived in 3 days, packed beautifully, and it's perfect in every way.",
+            "author": "Nina R.",
+            "location": "Amsterdam, NL",
+            "date": "April 2024",
+            "product_name": "Ceramic Candle Holder",
+            "verified": true
+          }
+        },
+        "review-9": {
+          "type": "review",
+          "settings": {
+            "rating": 4,
+            "title": "Solid purchase, great value",
+            "text": "Really solid quality at a very fair price. I've paid twice as much elsewhere for half the quality. Sizing was accurate and it arrived earlier than expected.",
+            "author": "Carlos G.",
+            "location": "Madrid, ES",
+            "date": "March 2024",
+            "verified": true
+          }
+        }
+      },
+      "blocks_order": ["review-1", "review-2", "review-3", "review-4", "review-5", "review-6", "review-7", "review-8", "review-9"],
+      "settings": {
+        "heading": "Loved by thousands of customers",
+        "subheading": "Real reviews from real people who love what we make.",
+        "overall_rating": "4.9",
+        "total_reviews": "2,400+",
+        "recommendation_pct": "98%",
+        "bar_5": 82,
+        "bar_4": 12,
+        "bar_3": 4,
+        "bar_2": 1,
+        "bar_1": 1,
+        "columns_desktop": "3",
+        "cta_text": "Ready to find your new favourite?",
+        "cta_label": "Shop now"
+      }
+    }
+  },
+  "order": ["main"]
+}

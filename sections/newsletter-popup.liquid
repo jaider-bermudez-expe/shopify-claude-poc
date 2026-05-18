@@ -1,0 +1,471 @@
+{%- assign popup_enabled = section.settings.enabled -%}
+{%- if popup_enabled -%}
+  {%- assign delay_ms = section.settings.delay_seconds | times: 1000 -%}
+
+  <div
+    class="np-overlay"
+    id="newsletter-popup-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="np-heading"
+    data-delay="{{ delay_ms }}"
+  >
+    <div class="np-modal">
+      <div class="np-panel np-panel--offer">
+        <div class="np-panel__inner">
+          <p class="np-eyebrow">{{ section.settings.eyebrow | escape }}</p>
+          <div class="np-offer-value" aria-hidden="true">{{ section.settings.offer_value | escape }}</div>
+          <p class="np-offer-label">{{ section.settings.offer_label | escape }}</p>
+        </div>
+        <div class="np-panel__decor" aria-hidden="true">
+          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" width="220" height="220"><circle cx="160" cy="40" r="80" fill="currentColor" opacity="0.07"/><circle cx="30" cy="160" r="60" fill="currentColor" opacity="0.05"/></svg>
+        </div>
+      </div>
+
+      <div class="np-panel np-panel--form">
+        <button class="np-close" id="np-close-btn" type="button" aria-label="{{ 'sections.newsletter_popup.close' | t }}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+
+        <div class="np-form-state" id="np-form-state">
+          <h2 class="np-heading" id="np-heading">{{ section.settings.heading | escape }}</h2>
+          <p class="np-body">{{ section.settings.body_text | escape }}</p>
+
+          {%- form 'customer', id: 'newsletter-popup-form', class: 'np-form' -%}
+            <input type="hidden" name="contact[tags]" value="newsletter">
+            <div class="np-field">
+              <input
+                type="email"
+                name="contact[email]"
+                id="np-email-input"
+                class="np-input"
+                placeholder="{{ 'sections.newsletter_popup.email_placeholder' | t }}"
+                required
+                autocomplete="email"
+                aria-label="{{ 'sections.newsletter_popup.email_placeholder' | t }}"
+              >
+            </div>
+            <button type="submit" class="np-submit btn btn--primary">
+              {{ section.settings.button_label | escape }}
+            </button>
+          {%- endform -%}
+
+          <button class="np-no-thanks" id="np-no-thanks-btn" type="button">
+            {{ section.settings.no_thanks_label | escape }}
+          </button>
+        </div>
+
+        <div class="np-success-state" id="np-success-state" hidden>
+          <div class="np-success-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+          <h2 class="np-success-heading">{{ 'sections.newsletter_popup.success_heading' | t }}</h2>
+          <p class="np-success-body">{{ 'sections.newsletter_popup.success_body' | t }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .np-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 1rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease, visibility 0.35s ease;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .np-overlay.is-visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .np-modal {
+    display: grid;
+    grid-template-columns: 1fr 1.25fr;
+    max-width: 46rem;
+    width: 100%;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.25);
+    transform: translateY(20px) scale(0.97);
+    transition: transform 0.35s ease;
+    position: relative;
+  }
+
+  .np-overlay.is-visible .np-modal {
+    transform: translateY(0) scale(1);
+  }
+
+  /* Offer panel */
+  .np-panel--offer {
+    background: var(--color-accent);
+    color: var(--color-accent-foreground);
+    padding: 3rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .np-panel__inner {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+
+  .np-panel__decor {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-accent-foreground);
+    pointer-events: none;
+  }
+
+  .np-eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin: 0 0 1rem;
+  }
+
+  .np-offer-value {
+    font-size: clamp(3.5rem, 8vw, 5rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    margin-bottom: 0.5rem;
+  }
+
+  .np-offer-label {
+    font-size: 0.875rem;
+    opacity: 0.85;
+    margin: 0;
+    line-height: 1.45;
+  }
+
+  /* Form panel */
+  .np-panel--form {
+    background: var(--color-background);
+    padding: 3rem 2.25rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+  }
+
+  .np-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-foreground);
+    opacity: 0.4;
+    transition: opacity var(--transition-base);
+    border-radius: 50%;
+  }
+
+  .np-close:hover {
+    opacity: 1;
+  }
+
+  .np-heading {
+    font-size: 1.375rem;
+    font-weight: 700;
+    margin: 0 0 0.75rem;
+    line-height: 1.25;
+    padding-right: 1.5rem;
+  }
+
+  .np-body {
+    font-size: 0.875rem;
+    opacity: 0.6;
+    line-height: 1.6;
+    margin: 0 0 1.5rem;
+  }
+
+  .np-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .np-field {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .np-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid rgba(0, 0, 0, 0.18);
+    border-radius: var(--style-border-radius-inputs);
+    font-size: 0.9375rem;
+    background: transparent;
+    color: var(--color-foreground);
+    transition: border-color var(--transition-base);
+  }
+
+  .np-input::placeholder {
+    opacity: 0.4;
+  }
+
+  .np-input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+  }
+
+  .np-submit {
+    width: 100%;
+    padding: 0.875rem;
+    font-size: 0.9375rem;
+    letter-spacing: 0.03em;
+  }
+
+  .np-no-thanks {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.8125rem;
+    color: #aaa;
+    padding: 0.5rem 0 0;
+    text-align: center;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color var(--transition-base);
+    align-self: center;
+  }
+
+  .np-no-thanks:hover {
+    color: var(--color-foreground);
+  }
+
+  .np-form-state[hidden],
+  .np-success-state[hidden] {
+    display: none;
+  }
+
+  /* Success state */
+  .np-success-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.75rem;
+    padding: 1rem 0;
+  }
+
+  .np-success-icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background: #edf7ef;
+    color: #2d7a3a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.25rem;
+  }
+
+  .np-success-heading {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .np-success-body {
+    font-size: 0.875rem;
+    opacity: 0.6;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* Mobile */
+  @media (max-width: 600px) {
+    .np-modal {
+      grid-template-columns: 1fr;
+      max-width: 22rem;
+    }
+
+    .np-panel--offer {
+      padding: 2rem 1.5rem;
+    }
+
+    .np-offer-value {
+      font-size: 3rem;
+    }
+
+    .np-panel--form {
+      padding: 2rem 1.5rem 1.75rem;
+    }
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  (function () {
+    var STORAGE_KEY = 'np_dismissed';
+    var overlay = document.getElementById('newsletter-popup-overlay');
+    if (!overlay) return;
+
+    var formState   = document.getElementById('np-form-state');
+    var successState = document.getElementById('np-success-state');
+    var closeBtn    = document.getElementById('np-close-btn');
+    var noThanksBtn = document.getElementById('np-no-thanks-btn');
+    var form        = overlay.querySelector('.np-form');
+
+    function hide() {
+      overlay.classList.remove('is-visible');
+    }
+
+    function dismiss() {
+      hide();
+      sessionStorage.setItem(STORAGE_KEY, '1');
+    }
+
+    function showSuccess() {
+      sessionStorage.setItem(STORAGE_KEY, '1');
+      if (formState) formState.hidden = true;
+      if (successState) successState.hidden = false;
+      setTimeout(hide, 3500);
+    }
+
+    /* Intercept form submit — POST via fetch so the page never reloads
+       and the URL stays clean. */
+    if (form) {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        var submitBtn = form.querySelector('[type="submit"]');
+        if (submitBtn) submitBtn.disabled = true;
+
+        fetch(form.action, {
+          method: 'POST',
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+          body: new FormData(form)
+        })
+          .then(function () {
+            showSuccess();
+          })
+          .catch(function () {
+            /* Network failure — fall back to normal submit so the user
+               still gets subscribed. */
+            form.submit();
+          });
+      });
+    }
+
+    /* Skip if already dismissed this session. */
+    if (sessionStorage.getItem(STORAGE_KEY)) return;
+
+    var delay = parseInt(overlay.dataset.delay || '2000', 10);
+    setTimeout(function () {
+      overlay.classList.add('is-visible');
+    }, delay);
+
+    if (closeBtn) closeBtn.addEventListener('click', dismiss);
+    if (noThanksBtn) noThanksBtn.addEventListener('click', dismiss);
+
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) dismiss();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && overlay.classList.contains('is-visible')) dismiss();
+    });
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "t:general.newsletter_popup",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "t:labels.enabled",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "delay_seconds",
+      "label": "t:labels.delay_seconds",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "default": 2
+    },
+    {
+      "type": "header",
+      "content": "t:labels.offer_panel"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "t:labels.eyebrow",
+      "default": "Special offer"
+    },
+    {
+      "type": "text",
+      "id": "offer_value",
+      "label": "t:labels.offer_value",
+      "default": "10%"
+    },
+    {
+      "type": "text",
+      "id": "offer_label",
+      "label": "t:labels.offer_label",
+      "default": "off your first order"
+    },
+    {
+      "type": "header",
+      "content": "t:labels.form_panel"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:labels.heading",
+      "default": "Join the insider list"
+    },
+    {
+      "type": "text",
+      "id": "body_text",
+      "label": "t:labels.text",
+      "default": "Be the first to know about new arrivals, exclusive deals, and styling tips."
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "t:labels.button_label",
+      "default": "Claim my discount"
+    },
+    {
+      "type": "text",
+      "id": "no_thanks_label",
+      "label": "t:labels.no_thanks",
+      "default": "No thanks, I'll pay full price"
+    }
+  ]
+}
+{% endschema %}

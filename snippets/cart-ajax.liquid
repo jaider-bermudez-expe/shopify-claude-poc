@@ -1,0 +1,129 @@
+{% doc %}
+  Global AJAX add-to-cart handler.
+
+  Intercepts every form[action*="/cart/add"] submit, POSTs to /cart/add.js
+  so the page never redirects, then updates the header cart badge count and
+  gives the submit button a brief "Added" confirmation state.
+{% enddoc %}
+
+<style>
+  [type="submit"].is-adding,
+  [type="submit"].is-added,
+  [type="submit"].is-error {
+    pointer-events: none;
+    opacity: 0.85;
+  }
+
+  [type="submit"].is-added {
+    background-color: #2d7a3a;
+    border-color: #2d7a3a;
+    color: #fff;
+  }
+
+  [type="submit"].is-error {
+    background-color: #c00;
+    border-color: #c00;
+    color: #fff;
+  }
+</style>
+
+<script>
+  (function () {
+    var ADDING_CLASS = 'is-adding';
+    var ADDED_CLASS  = 'is-added';
+    var ERROR_CLASS  = 'is-error';
+    var RESET_DELAY  = 2000;
+
+    function updateCartBadges(count) {
+      var desktopBadge = document.querySelector('.header__cart-count');
+      var mobileBadge  = document.querySelector('.mobile-menu__cart-count');
+
+      if (count > 0) {
+        if (desktopBadge) {
+          desktopBadge.textContent = count;
+          desktopBadge.style.display = '';
+        } else {
+          /* Badge element doesn't exist yet (cart was empty) — create it */
+          var cartLink = document.querySelector('.header__cart');
+          if (cartLink) {
+            var span = document.createElement('span');
+            span.className = 'header__cart-count';
+            span.setAttribute('aria-hidden', 'true');
+            span.textContent = count;
+            cartLink.appendChild(span);
+          }
+        }
+        if (mobileBadge) {
+          mobileBadge.textContent = '(' + count + ')';
+          mobileBadge.style.display = '';
+        }
+      } else {
+        if (desktopBadge) desktopBadge.style.display = 'none';
+        if (mobileBadge)  mobileBadge.style.display  = 'none';
+      }
+    }
+
+    function setButtonState(btn, state, originalText) {
+      btn.disabled = (state === 'adding');
+      btn.classList.remove(ADDING_CLASS, ADDED_CLASS, ERROR_CLASS);
+
+      if (state === 'adding') {
+        btn.classList.add(ADDING_CLASS);
+        btn.textContent = btn.dataset.addingText || '{{ 'cart.adding' | t }}';
+      } else if (state === 'added') {
+        btn.classList.add(ADDED_CLASS);
+        btn.textContent = btn.dataset.addedText || '{{ 'cart.added' | t }}';
+        setTimeout(function () {
+          btn.disabled = false;
+          btn.classList.remove(ADDED_CLASS);
+          btn.textContent = originalText;
+        }, RESET_DELAY);
+      } else if (state === 'error') {
+        btn.classList.add(ERROR_CLASS);
+        btn.textContent = btn.dataset.errorText || '{{ 'cart.error' | t }}';
+        setTimeout(function () {
+          btn.disabled = false;
+          btn.classList.remove(ERROR_CLASS);
+          btn.textContent = originalText;
+        }, RESET_DELAY);
+      }
+    }
+
+    document.addEventListener('submit', function (e) {
+      var form = e.target;
+      if (!form.matches('form[action*="/cart/add"]')) return;
+
+      e.preventDefault();
+
+      var btn = form.querySelector('[type="submit"]');
+      if (!btn) return;
+
+      var originalText = btn.textContent.trim();
+      setButtonState(btn, 'adding', originalText);
+
+      fetch('/cart/add.js', {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: new FormData(form)
+      })
+        .then(function (res) {
+          if (!res.ok) { return res.json().then(function (d) { throw d; }); }
+          return res.json();
+        })
+        .then(function () {
+          /* Fetch updated cart count */
+          return fetch('/cart.js', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+          });
+        })
+        .then(function (res) { return res.json(); })
+        .then(function (cart) {
+          setButtonState(btn, 'added', originalText);
+          updateCartBadges(cart.item_count);
+        })
+        .catch(function () {
+          setButtonState(btn, 'error', originalText);
+        });
+    });
+  })();
+</script>

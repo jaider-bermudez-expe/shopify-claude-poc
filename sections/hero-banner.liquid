@@ -1,0 +1,278 @@
+<div
+  class="hero-banner full-width"
+  style="
+    --hero-min-height: {{ section.settings.min_height }}vh;
+    --hero-overlay: {{ section.settings.overlay_opacity | divided_by: 100.0 }};
+    --hero-text-align: {{ section.settings.text_alignment }};
+    --hero-color: {{ section.settings.text_color }};
+  "
+>
+  {%- if section.settings.image -%}
+    <div class="hero-banner__media">
+      {{
+        section.settings.image
+        | image_url: width: 2000
+        | image_tag:
+          loading: 'eager',
+          fetchpriority: 'high',
+          class: 'hero-banner__image',
+          alt: section.settings.image.alt | escape
+      }}
+    </div>
+  {%- endif -%}
+
+  <div class="hero-banner__overlay"></div>
+
+  <div class="hero-banner__content">
+    {%- if section.settings.subheading != blank -%}
+      <p class="hero-banner__subheading">{{ section.settings.subheading | escape }}</p>
+    {%- endif -%}
+
+    {%- if section.settings.heading != blank -%}
+      <h1 class="hero-banner__heading">{{ section.settings.heading | escape }}</h1>
+    {%- endif -%}
+
+    {%- if section.settings.body_text != blank -%}
+      <p class="hero-banner__body">{{ section.settings.body_text | escape }}</p>
+    {%- endif -%}
+
+    {%- if section.settings.button_label != blank -%}
+      <div class="hero-banner__actions">
+        <a href="{{ section.settings.button_url }}" class="btn btn--primary">
+          {{ section.settings.button_label | escape }}
+        </a>
+
+        {%- if section.settings.secondary_button_label != blank -%}
+          <a href="{{ section.settings.secondary_button_url }}" class="btn btn--outline-white">
+            {{ section.settings.secondary_button_label | escape }}
+          </a>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% stylesheet %}
+  .hero-banner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: var(--hero-text-align);
+    min-height: var(--hero-min-height);
+    color: var(--hero-color);
+    overflow: hidden;
+    background-color: #111;
+  }
+
+  .hero-banner__media {
+    position: absolute;
+    inset: 0;
+  }
+
+  .hero-banner__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .hero-banner__overlay {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, var(--hero-overlay));
+    z-index: 1;
+  }
+
+  .hero-banner__content {
+    position: relative;
+    z-index: 2;
+    max-width: min(64rem, 100%);
+    padding: 5rem var(--page-margin);
+    text-align: var(--hero-text-align);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: var(--hero-text-align);
+  }
+
+  .hero-banner__subheading {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.8;
+    margin: 0;
+  }
+
+  .hero-banner__heading {
+    font-size: clamp(2.25rem, 6vw, 5rem);
+    font-weight: 700;
+    line-height: 1.08;
+    margin: 0;
+    max-width: 18ch;
+  }
+
+  .hero-banner__body {
+    font-size: 1.125rem;
+    opacity: 0.85;
+    max-width: 46ch;
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  .hero-banner__actions {
+    display: flex;
+    gap: 0.875rem;
+    flex-wrap: wrap;
+    margin-top: 0.75rem;
+  }
+
+  /* Shared button base */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.875rem 2rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    border-radius: var(--style-border-radius-inputs);
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: background-color var(--transition-base), color var(--transition-base), border-color var(--transition-base), opacity var(--transition-base);
+  }
+
+  .btn--primary {
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+    border-color: var(--color-accent);
+  }
+
+  .btn--primary:hover {
+    opacity: 0.88;
+  }
+
+  .btn--outline-white {
+    background-color: transparent;
+    color: currentColor;
+    border-color: currentColor;
+  }
+
+  .btn--outline-white:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .btn--outline {
+    background-color: transparent;
+    color: var(--color-foreground);
+    border-color: rgba(0, 0, 0, 0.25);
+  }
+
+  .btn--outline:hover {
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+    border-color: var(--color-accent);
+  }
+
+  @media (max-width: 749px) {
+    .hero-banner__content {
+      padding: 4rem var(--page-margin);
+      align-items: flex-start;
+      text-align: left;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.hero_banner",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:labels.background_image"
+    },
+    {
+      "type": "range",
+      "id": "min_height",
+      "label": "t:labels.min_height",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "vh",
+      "default": 75
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "t:labels.overlay_opacity",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 35
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "t:labels.alignment",
+      "options": [
+        { "value": "flex-start", "label": "t:options.alignment.left" },
+        { "value": "center", "label": "t:options.alignment.center" }
+      ],
+      "default": "flex-start"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "t:labels.foreground",
+      "default": "#ffffff"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "t:labels.subheading",
+      "default": "New collection"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:labels.heading",
+      "default": "Curated for the modern home"
+    },
+    {
+      "type": "text",
+      "id": "body_text",
+      "label": "t:labels.text",
+      "default": "Discover our latest collections crafted with the finest materials."
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "t:labels.button_label",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "t:labels.button_url"
+    },
+    {
+      "type": "text",
+      "id": "secondary_button_label",
+      "label": "t:labels.secondary_button_label"
+    },
+    {
+      "type": "url",
+      "id": "secondary_button_url",
+      "label": "t:labels.secondary_button_url"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:general.hero_banner"
+    }
+  ]
+}
+{% endschema %}

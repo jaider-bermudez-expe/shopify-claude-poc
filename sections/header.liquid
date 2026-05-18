@@ -1,0 +1,832 @@
+{%- if section.settings.announcement_text != blank -%}
+  <div
+    class="announcement full-width"
+    style="--announcement-bg: {{ section.settings.announcement_bg }}; --announcement-color: {{ section.settings.announcement_color }};"
+  >
+    <p class="announcement__text">
+      {%- if section.settings.announcement_url != blank -%}
+        <a href="{{ section.settings.announcement_url }}" class="announcement__link">
+          {{ section.settings.announcement_text | escape }}
+        </a>
+      {%- else -%}
+        {{ section.settings.announcement_text | escape }}
+      {%- endif -%}
+    </p>
+  </div>
+{%- endif -%}
+
+<header class="header full-width" id="site-header">
+  <div class="header__inner">
+    <button
+      class="header__hamburger"
+      aria-label="{{ 'sections.header.menu_open' | t }}"
+      aria-expanded="false"
+      aria-controls="mobile-menu"
+      id="mobile-menu-toggle"
+      type="button"
+    >
+      <span class="hamburger__bar"></span>
+      <span class="hamburger__bar"></span>
+      <span class="hamburger__bar"></span>
+    </button>
+
+    <nav class="header__nav" aria-label="{{ 'sections.header.navigation' | t }}">
+      {%- if section.settings.menu != blank -%}
+        {%- for link in section.settings.menu.links -%}
+          {%- if link.links != blank -%}
+            <details class="header__nav-dropdown">
+              <summary class="header__nav-link header__nav-link--has-dropdown">
+                {{ link.title | escape }}
+                <svg class="header__chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <ul class="header__dropdown-menu" role="list">
+                {%- for child in link.links -%}
+                  <li>
+                    <a href="{{ child.url }}" class="header__dropdown-link">{{ child.title | escape }}</a>
+                  </li>
+                {%- endfor -%}
+              </ul>
+            </details>
+          {%- else -%}
+            <a
+              href="{{ link.url }}"
+              class="header__nav-link{% if link.active %} header__nav-link--active{% endif %}{% if link.title == 'Sale' or link.title == 'sale' %} header__nav-link--sale{% endif %}"
+            >
+              {{ link.title | escape }}
+            </a>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- else -%}
+        <a href="{{ routes.root_url }}" class="header__nav-link">Home</a>
+        <details class="header__nav-dropdown">
+          <summary class="header__nav-link header__nav-link--has-dropdown">
+            Collections
+            <svg class="header__chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <ul class="header__dropdown-menu" role="list">
+            <li><a href="/collections/home-garden" class="header__dropdown-link">Home &amp; Garden</a></li>
+            <li><a href="/collections/jewelry" class="header__dropdown-link">Jewelry</a></li>
+            <li><a href="/collections/clothing" class="header__dropdown-link">Clothing</a></li>
+            <li><a href="/collections/all" class="header__dropdown-link">View all</a></li>
+          </ul>
+        </details>
+        <a href="/pages/about" class="header__nav-link">About</a>
+        <a href="/collections/sale" class="header__nav-link header__nav-link--sale">Sale</a>
+      {%- endif -%}
+    </nav>
+
+    {%- assign shop_name_escaped = shop.name | escape -%}
+    <a href="{{ routes.root_url }}" class="header__logo" aria-label="{{ shop_name_escaped }}">
+      {%- if section.settings.logo -%}
+        {{
+          section.settings.logo
+          | image_url: width: 300
+          | image_tag:
+            class: 'header__logo-image',
+            alt: shop_name_escaped,
+            loading: 'eager'
+        }}
+      {%- else -%}
+        <span class="header__logo-text">{{ shop.name | escape }}</span>
+      {%- endif -%}
+    </a>
+
+    <div class="header__actions">
+      <button
+        class="header__icon-btn header__search-btn"
+        id="search-toggle"
+        type="button"
+        aria-label="{{ 'sections.header.search' | t }}"
+        aria-expanded="false"
+        aria-controls="header-search"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      </button>
+
+      {%- if shop.customer_accounts_enabled -%}
+        <shopify-account
+          menu="{{ section.settings.customer_account_menu }}"
+          class="header__icon-btn"
+          aria-label="{{ 'sections.header.account' | t }}"
+        >
+          {{ 'icon-account.svg' | inline_asset_content }}
+        </shopify-account>
+      {%- endif -%}
+
+      <a
+        href="{{ routes.cart_url }}"
+        class="header__icon-btn header__cart"
+        aria-label="{{ 'sections.header.cart' | t }}"
+      >
+        {{ 'icon-cart.svg' | inline_asset_content }}
+        {%- if cart.item_count > 0 -%}
+          <span class="header__cart-count" aria-hidden="true">{{ cart.item_count }}</span>
+        {%- endif -%}
+      </a>
+    </div>
+  </div>
+
+  <div class="header__search" id="header-search" aria-hidden="true" role="search">
+    <form action="{{ routes.search_url }}" method="get" class="header__search-form">
+      <button type="submit" class="header__search-submit" aria-label="{{ 'search.submit' | t }}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      </button>
+      <input
+        type="search"
+        name="q"
+        id="header-search-input"
+        class="header__search-input"
+        placeholder="{{ 'search.placeholder' | t }}"
+        autocomplete="off"
+        aria-label="{{ 'search.placeholder' | t }}"
+      >
+      <button type="button" class="header__search-close" id="search-close" aria-label="{{ 'sections.header.close_search' | t }}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </form>
+  </div>
+</header>
+
+<nav
+  class="mobile-menu"
+  id="mobile-menu"
+  aria-label="{{ 'sections.header.mobile_navigation' | t }}"
+  aria-hidden="true"
+>
+  <div class="mobile-menu__header">
+    <a href="{{ routes.root_url }}" class="mobile-menu__brand">{{ shop.name | escape }}</a>
+    <button class="mobile-menu__close-btn" id="mobile-close" type="button" aria-label="{{ 'sections.header.menu_close' | t }}">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+  </div>
+
+  <ul class="mobile-menu__list" role="list">
+    {%- if section.settings.menu != blank -%}
+      {%- for link in section.settings.menu.links -%}
+        <li class="mobile-menu__item">
+          <a href="{{ link.url }}" class="mobile-menu__link">{{ link.title | escape }}</a>
+          {%- if link.links != blank -%}
+            <ul class="mobile-menu__sub" role="list">
+              {%- for child in link.links -%}
+                <li>
+                  <a href="{{ child.url }}" class="mobile-menu__sub-link">{{ child.title | escape }}</a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    {%- else -%}
+      <li class="mobile-menu__item"><a href="{{ routes.root_url }}" class="mobile-menu__link">Home</a></li>
+      <li class="mobile-menu__item">
+        <a href="/collections/all" class="mobile-menu__link">Collections</a>
+        <ul class="mobile-menu__sub" role="list">
+          <li><a href="/collections/home-garden" class="mobile-menu__sub-link">Home &amp; Garden</a></li>
+          <li><a href="/collections/jewelry" class="mobile-menu__sub-link">Jewelry</a></li>
+          <li><a href="/collections/clothing" class="mobile-menu__sub-link">Clothing</a></li>
+        </ul>
+      </li>
+      <li class="mobile-menu__item"><a href="/pages/about" class="mobile-menu__link">About</a></li>
+      <li class="mobile-menu__item"><a href="/collections/sale" class="mobile-menu__link mobile-menu__link--sale">Sale</a></li>
+    {%- endif -%}
+  </ul>
+
+  <div class="mobile-menu__footer">
+    <a href="{{ routes.search_url }}" class="mobile-menu__footer-link">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      {{ 'search.title' | t }}
+    </a>
+    <a href="{{ routes.cart_url }}" class="mobile-menu__footer-link">
+      {{ 'icon-cart.svg' | inline_asset_content }}
+      {{ 'cart.title' | t }}
+      {%- if cart.item_count > 0 -%}
+        <span class="mobile-menu__cart-count">({{ cart.item_count }})</span>
+      {%- endif -%}
+    </a>
+  </div>
+</nav>
+<div class="mobile-menu__backdrop" id="mobile-backdrop" aria-hidden="true"></div>
+
+{% stylesheet %}
+  /* Announcement bar */
+  .announcement {
+    background-color: var(--announcement-bg);
+    color: var(--announcement-color);
+    padding: 0.625rem var(--page-margin);
+    text-align: center;
+  }
+
+  .announcement__text {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    margin: 0;
+  }
+
+  .announcement__link {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* Header */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: var(--color-background);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+    transition: box-shadow var(--transition-base);
+  }
+
+  .header.is-scrolled {
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  .header__inner {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    height: 4.5rem;
+    padding: 0 var(--page-margin);
+    gap: 1.5rem;
+    max-width: var(--page-width);
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* Logo */
+  .header__logo {
+    grid-column: 2;
+    text-decoration: none;
+    color: var(--color-foreground);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .header__logo-image {
+    max-height: 2.25rem;
+    width: auto;
+    height: auto;
+  }
+
+  .header__logo-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    white-space: nowrap;
+  }
+
+  /* Desktop nav */
+  .header__nav {
+    grid-column: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.125rem;
+    justify-self: start;
+  }
+
+  .header__nav-link {
+    padding: 0.5rem 0.75rem;
+    text-decoration: none;
+    color: var(--color-foreground);
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+    transition: background-color var(--transition-base);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    cursor: pointer;
+    list-style: none;
+    background: none;
+    border: none;
+    white-space: nowrap;
+  }
+
+  .header__nav-link:hover,
+  .header__nav-link--active {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .header__nav-link--sale {
+    color: #c00;
+    font-weight: 600;
+  }
+
+  .header__nav-link--sale:hover {
+    background-color: rgba(200, 0, 0, 0.06);
+  }
+
+  .header__chevron {
+    transition: transform var(--transition-base);
+    flex-shrink: 0;
+  }
+
+  .header__nav-dropdown[open] .header__chevron {
+    transform: rotate(180deg);
+  }
+
+  .header__nav-dropdown {
+    position: relative;
+  }
+
+  .header__nav-dropdown > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .header__dropdown-menu {
+    position: absolute;
+    top: calc(100% + 0.75rem);
+    left: 0;
+    min-width: 14rem;
+    background: var(--color-background);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0.75rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    padding: 0.5rem;
+    list-style: none;
+    margin: 0;
+    z-index: 10;
+  }
+
+  .header__dropdown-link {
+    display: block;
+    padding: 0.625rem 0.875rem;
+    text-decoration: none;
+    color: var(--color-foreground);
+    font-size: 0.875rem;
+    border-radius: 0.5rem;
+    transition: background-color var(--transition-base);
+  }
+
+  .header__dropdown-link:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  /* Actions */
+  .header__actions {
+    grid-column: 3;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    justify-self: end;
+  }
+
+  .header__icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.375rem;
+    text-decoration: none;
+    color: var(--color-foreground);
+    transition: background-color var(--transition-base);
+    position: relative;
+    cursor: pointer;
+    background: none;
+    border: none;
+  }
+
+  .header__icon-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .header__icon-btn svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .header__cart-count {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: var(--color-accent);
+    color: var(--color-accent-foreground);
+    border-radius: 50%;
+    width: 1.05rem;
+    height: 1.05rem;
+    font-size: 0.6rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  /* Search drawer */
+  .header__search {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.3s ease, border-color 0.3s ease;
+    border-top: 0px solid rgba(0, 0, 0, 0.07);
+  }
+
+  .header__search[aria-hidden="false"] {
+    max-height: 5rem;
+    border-top-width: 1px;
+  }
+
+  .header__search-form {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: 0.75rem var(--page-margin);
+  }
+
+  .header__search-submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-foreground);
+    opacity: 0.5;
+    padding: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .header__search-input {
+    flex: 1;
+    border: none;
+    font-size: 1rem;
+    background: transparent;
+    color: var(--color-foreground);
+    padding: 0.5rem 0.75rem;
+    outline: none;
+  }
+
+  .header__search-input::placeholder {
+    opacity: 0.4;
+  }
+
+  .header__search-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-foreground);
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    transition: background-color var(--transition-base);
+    flex-shrink: 0;
+  }
+
+  .header__search-close:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  /* Hamburger */
+  .header__hamburger {
+    display: none;
+    grid-column: 1;
+    justify-self: start;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    transition: background-color var(--transition-base);
+  }
+
+  .header__hamburger:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .hamburger__bar {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--color-foreground);
+    border-radius: 2px;
+    transition: transform var(--transition-base), opacity var(--transition-base);
+  }
+
+  .header__hamburger[aria-expanded="true"] .hamburger__bar:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  .header__hamburger[aria-expanded="true"] .hamburger__bar:nth-child(2) {
+    opacity: 0;
+  }
+
+  .header__hamburger[aria-expanded="true"] .hamburger__bar:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  /* Mobile menu drawer */
+  .mobile-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 17.5rem;
+    height: 100vh;
+    background: var(--color-background);
+    z-index: 200;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 6px 0 24px rgba(0, 0, 0, 0.1);
+  }
+
+  .mobile-menu[aria-hidden="false"] {
+    transform: translateX(0);
+  }
+
+  .mobile-menu__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.25rem 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+    flex-shrink: 0;
+  }
+
+  .mobile-menu__brand {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+    color: var(--color-foreground);
+  }
+
+  .mobile-menu__close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 0.375rem;
+    color: var(--color-foreground);
+    transition: background-color var(--transition-base);
+  }
+
+  .mobile-menu__close-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .mobile-menu__backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 190;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .mobile-menu__backdrop.is-active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .mobile-menu__list {
+    list-style: none;
+    padding: 0.75rem 0.75rem 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    flex: 1;
+  }
+
+  .mobile-menu__link {
+    display: block;
+    padding: 0.75rem 0.875rem;
+    text-decoration: none;
+    color: var(--color-foreground);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    transition: background-color var(--transition-base);
+  }
+
+  .mobile-menu__link:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .mobile-menu__link--sale {
+    color: #c00;
+    font-weight: 600;
+  }
+
+  .mobile-menu__sub {
+    list-style: none;
+    padding: 0 0 0.25rem 1.125rem;
+    margin: 0;
+  }
+
+  .mobile-menu__sub-link {
+    display: block;
+    padding: 0.5rem 0.875rem;
+    text-decoration: none;
+    color: var(--color-foreground);
+    font-size: 0.875rem;
+    opacity: 0.6;
+    border-radius: 0.375rem;
+    transition: background-color var(--transition-base), opacity var(--transition-base);
+  }
+
+  .mobile-menu__sub-link:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    opacity: 1;
+  }
+
+  .mobile-menu__footer {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem 1rem 1.25rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.07);
+    margin-top: auto;
+    flex-shrink: 0;
+  }
+
+  .mobile-menu__footer-link {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-decoration: none;
+    color: var(--color-foreground);
+    font-size: 0.875rem;
+    font-weight: 500;
+    opacity: 0.65;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    transition: opacity var(--transition-base), background-color var(--transition-base);
+    flex: 1;
+    justify-content: center;
+  }
+
+  .mobile-menu__footer-link:hover {
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.03);
+  }
+
+  .mobile-menu__footer-link svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .mobile-menu__cart-count {
+    font-weight: 700;
+  }
+
+  @media (max-width: 900px) {
+    .header__hamburger {
+      display: flex;
+    }
+
+    .header__nav {
+      display: none;
+    }
+
+    .header__inner {
+      grid-template-columns: auto 1fr auto;
+    }
+
+    .header__logo {
+      grid-column: 2;
+    }
+
+    .header__actions {
+      grid-column: 3;
+    }
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  (function () {
+    /* Mobile menu */
+    var toggle = document.getElementById('mobile-menu-toggle');
+    var mobileClose = document.getElementById('mobile-close');
+    var menu = document.getElementById('mobile-menu');
+    var backdrop = document.getElementById('mobile-backdrop');
+
+    function openMenu() {
+      toggle.setAttribute('aria-expanded', 'true');
+      menu.setAttribute('aria-hidden', 'false');
+      backdrop.classList.add('is-active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMenu() {
+      toggle.setAttribute('aria-expanded', 'false');
+      menu.setAttribute('aria-hidden', 'true');
+      backdrop.classList.remove('is-active');
+      document.body.style.overflow = '';
+    }
+
+    if (toggle) { toggle.addEventListener('click', function () { openMenu(); }); }
+    if (mobileClose) { mobileClose.addEventListener('click', closeMenu); }
+    if (backdrop) { backdrop.addEventListener('click', closeMenu); }
+
+    /* Search panel */
+    var searchToggle = document.getElementById('search-toggle');
+    var searchPanel = document.getElementById('header-search');
+    var searchClose = document.getElementById('search-close');
+    var searchInput = document.getElementById('header-search-input');
+
+    function openSearch() {
+      searchPanel.setAttribute('aria-hidden', 'false');
+      searchToggle.setAttribute('aria-expanded', 'true');
+      setTimeout(function () { if (searchInput) { searchInput.focus(); } }, 50);
+    }
+
+    function closeSearch() {
+      searchPanel.setAttribute('aria-hidden', 'true');
+      searchToggle.setAttribute('aria-expanded', 'false');
+    }
+
+    if (searchToggle) { searchToggle.addEventListener('click', function () {
+      var isOpen = searchPanel.getAttribute('aria-hidden') === 'false';
+      if (isOpen) { closeSearch(); } else { openSearch(); }
+    }); }
+
+    if (searchClose) { searchClose.addEventListener('click', closeSearch); }
+
+    /* Scroll shadow */
+    var header = document.getElementById('site-header');
+    if (header) {
+      window.addEventListener('scroll', function () {
+        if (window.scrollY > 20) { header.classList.add('is-scrolled'); }
+        else { header.classList.remove('is-scrolled'); }
+      }, { passive: true });
+    }
+
+    /* Close search/menu on Escape */
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { closeMenu(); closeSearch(); }
+    });
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "t:general.header",
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:general.header"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "t:labels.logo"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "t:labels.menu"
+    },
+    {
+      "type": "link_list",
+      "id": "customer_account_menu",
+      "label": "t:labels.customer_account_menu",
+      "default": "customer-account-main-menu"
+    },
+    {
+      "type": "header",
+      "content": "t:general.promo_banner"
+    },
+    {
+      "type": "text",
+      "id": "announcement_text",
+      "label": "t:labels.text",
+      "default": "Free shipping on orders over $75 — Shop now"
+    },
+    {
+      "type": "url",
+      "id": "announcement_url",
+      "label": "t:labels.button_url"
+    },
+    {
+      "type": "color",
+      "id": "announcement_bg",
+      "label": "t:labels.background",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "color",
+      "id": "announcement_color",
+      "label": "t:labels.foreground",
+      "default": "#ffffff"
+    }
+  ]
+}
+{% endschema %}
